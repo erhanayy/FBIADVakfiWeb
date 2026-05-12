@@ -10,6 +10,12 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  
+  --color-fbiad-yellow: rgb(209, 174, 102);
+  --color-fbiad-blue: rgb(8, 45, 116);
+  --color-fbiad-white: rgb(255, 254, 244);
+  --color-fbiad-dark-blue: rgb(23, 60, 106);
+  --color-fbiad-dark-yellow: rgb(153, 133, 118);
 }
 
 @media (prefers-color-scheme: dark) {
