@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     }
 
     // Call BurstaBugun webhook to mark specified fund payments as completed
-    const burstaAppUrl = process.env.BURSTABUGUN_API_URL || 'http://localhost:3004';
+    const burstaAppUrl = process.env.BURSTABUGUN_API_URL || 'http://localhost:3003';
     const webhookUrl = `${burstaAppUrl}/api/webhooks/payment-complete`;
 
     const response = await fetch(webhookUrl, {

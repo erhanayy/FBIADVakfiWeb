@@ -193,7 +193,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                         const dateStr = dateObj.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
                         return (
                           <tr key={item.id} className="hover:bg-gray-50">
-                            <td className="px-4 py-3 text-gray-600">
+                            <td suppressHydrationWarning className="px-4 py-3 text-gray-600">
                               <span className="font-medium">{index + 1}. Taksit</span> - {dateStr}
                             </td>
                             <td className="px-4 py-3 text-right font-bold text-fbiad-dark-blue">
