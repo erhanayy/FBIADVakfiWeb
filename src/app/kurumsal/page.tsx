@@ -143,21 +143,21 @@ export default function KurumsalPage() {
               <div className="flex items-center gap-4">
                 <div className="bg-red-100 text-red-600 p-3 rounded-lg font-bold">PDF</div>
                 <div>
-                  <h4 className="font-bold text-fbiad-dark-blue">2025 Yılı Faaliyet Raporu</h4>
-                  <p className="text-sm text-gray-500">Eklenme: Mayıs 2026</p>
+                  <h4 className="font-bold text-fbiad-dark-blue">2025-2026 Öğretim yılı Faaliyet Raporu</h4>
+                  <p className="text-sm text-gray-500">Burs Dönemi</p>
                 </div>
               </div>
-              <a href="#" className="text-fbiad-blue hover:text-fbiad-yellow font-semibold">İndir</a>
+              <a href="/fbiad_vakfi_2025_2026_burs_faaliyet_raporu.pdf" download target="_blank" className="text-fbiad-blue hover:text-fbiad-yellow font-semibold">İndir</a>
             </div>
             <div className="flex justify-between items-center p-6 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow">
               <div className="flex items-center gap-4">
                 <div className="bg-red-100 text-red-600 p-3 rounded-lg font-bold">PDF</div>
                 <div>
-                  <h4 className="font-bold text-fbiad-dark-blue">2024 Yılı Faaliyet Raporu</h4>
-                  <p className="text-sm text-gray-500">Eklenme: Ocak 2025</p>
+                  <h4 className="font-bold text-fbiad-dark-blue">2024-2025 Öğretim yılı Faaliyet Raporu</h4>
+                  <p className="text-sm text-gray-500">Burs Dönemi</p>
                 </div>
               </div>
-              <a href="#" className="text-fbiad-blue hover:text-fbiad-yellow font-semibold">İndir</a>
+              <a href="/fbiad_vakfi_2024_2025_burs_faaliyet_raporu.pdf" download target="_blank" className="text-fbiad-blue hover:text-fbiad-yellow font-semibold">İndir</a>
             </div>
           </div>
         </section>

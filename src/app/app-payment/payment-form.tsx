@@ -14,12 +14,16 @@ type PaymentPayload = {
     id: string;
     date: string;
     status: string;
+    amount: number;
   }[];
   returnUrl?: string;
 };
 
 export default function AppPaymentForm({ payload }: { payload: PaymentPayload }) {
   const [cardNumber, setCardNumber] = useState("");
+  const [cardHolder, setCardHolder] = useState("");
+  const [expDate, setExpDate] = useState("");
+  const [cvc, setCvc] = useState("");
   const [isContractAccepted, setIsContractAccepted] = useState(false);
   const [isNotRobot, setIsNotRobot] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -72,32 +76,67 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
     setIsSubmitting(true);
     
     try {
-      const bankResult = await simulateBankTransaction(cardNumber);
+      const cleanCard = cardNumber.replace(/\s/g, '');
       
-      if (!bankResult.success) {
-        showAlert("Banka işlemi reddedildi. Lütfen kart bilgilerinizi kontrol ediniz.", "error");
-        setIsSubmitting(false);
-        return;
-      }
+      if (cleanCard === '1111111111111111') {
+        // Test Bypass Scenario
+        const bankResult = await simulateBankTransaction(cardNumber);
+        if (!bankResult.success) {
+          showAlert("Banka işlemi reddedildi. Lütfen kart bilgilerinizi kontrol ediniz.", "error");
+          setIsSubmitting(false);
+          return;
+        }
 
-      // Call our API to hit the webhook of BurstaBugun
-      const response = await fetch('/api/app-payment/execute', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fundId: payload.fundId,
-          transactionId: bankResult.transactionId,
-          paymentIds: payload.plan.map(p => p.id)
-        })
-      });
+        const response = await fetch('/api/app-payment/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fundId: payload.fundId,
+            transactionId: bankResult.transactionId,
+            paymentIds: payload.plan.map(p => p.id)
+          })
+        });
 
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setIsSuccess(true);
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setIsSuccess(true);
+        } else {
+          showAlert("Ödeme sisteme kaydedilirken hata oluştu.", "error");
+        }
       } else {
-        showAlert("Ödeme banka tarafından onaylandı ancak sisteme kaydedilirken bir hata oluştu.", "error");
-        console.error(data.error);
+        // Real Moka United Integration
+        if (!expDate || expDate.length < 5 || !cvc || cvc.length < 3) {
+          showAlert("Lütfen kartınızın son kullanma tarihini ve CVC kodunu eksiksiz giriniz.", "warning");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const [expMonth, expYearPrefix] = expDate.split('/');
+        const expYear = "20" + expYearPrefix; // Converts "25" to "2025"
+
+        const response = await fetch('/api/payment/moka-init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cardInfo: {
+              cardHolderName: cardHolder,
+              cardNumber: cleanCard,
+              expMonth,
+              expYear,
+              cvc
+            },
+            payload
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success && data.redirectUrl) {
+          // Redirect to Moka 3D Secure page
+          window.location.href = data.redirectUrl;
+          return; // Do not clear isSubmitting to prevent double clicks during redirect
+        } else {
+          showAlert(data.error || "Banka işlemi sırasında bir hata oluştu.", "error");
+        }
       }
     } catch (error) {
       console.error("Payment error:", error);
@@ -229,7 +268,14 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               <div className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-700">Kart Üzerindeki İsim</label>
-                  <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none uppercase" placeholder="KART SAHİBİ" />
+                  <input 
+                    type="text" 
+                    value={cardHolder}
+                    onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
+                    required
+                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none uppercase" 
+                    placeholder="KART SAHİBİ" 
+                  />
                 </div>
                 
                 <div className="space-y-2">
@@ -253,14 +299,34 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                     <label className="text-sm font-semibold text-gray-700">Son Kullanma Tarihi</label>
                     <div className="relative">
                       <Calendar size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="text" maxLength={5} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="AA/YY" />
+                      <input 
+                        type="text" 
+                        value={expDate}
+                        onChange={(e) => {
+                          let val = e.target.value.replace(/\D/g, '');
+                          if (val.length >= 2) val = val.slice(0,2) + '/' + val.slice(2,4);
+                          setExpDate(val);
+                        }}
+                        required
+                        maxLength={5} 
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" 
+                        placeholder="AA/YY" 
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">CVC / CVV</label>
                     <div className="relative">
                       <ShieldCheck size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="text" maxLength={3} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="123" />
+                      <input 
+                        type="text" 
+                        value={cvc}
+                        onChange={(e) => setCvc(e.target.value.replace(/\D/g, ''))}
+                        required
+                        maxLength={3} 
+                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" 
+                        placeholder="123" 
+                      />
                     </div>
                   </div>
                 </div>

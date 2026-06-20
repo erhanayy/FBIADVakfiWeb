@@ -1,7 +1,7 @@
 export const kurumsalData = {
-  hakkimizda: "FBİAD Vakfı, gençlerin eğitim yolculuğuna umut olmak ve fırsat eşitliğini güçlendirmek amacıyla dayanışma kültürüyle hareket eden bir iyilik vakfıdır.",
-  misyonumuz: "Eğitim hayatında desteğe ihtiyaç duyan gençlerin potansiyellerini özgüvenle gerçekleştirebilmeleri için sürdürülebilir katkı sağlamak.",
-  vizyonumuz: "Eğitimde fırsat eşitliğini büyüten, sosyal dayanışmayı güçlendiren ve geleceğe değer katan örnek bir vakıf olmak.",
+  hakkimizda: "FBİAD Vakfı, Fenerbahçeli İş Adamları Derneği’nin sahip olduğu köklü dayanışma kültürünü ve toplumsal sorumluluk bilincini geleceğe taşımak üzere kurulmuştur. Temel amacımız; ülkemizin yarınlarını inşa edecek olan gençlerimizin eğitim hayatlarına umut olmak, maddi imkansızlıkların yeteneklerin önüne geçmesini engellemek ve adil bir eğitim zeminine katkı sunmaktır. Değerli gönüllülerimizin ve bağışçılarımızın katkılarıyla büyüyen vakfımız, eğitim desteklerinin yanı sıra toplumsal yardımlaşma projeleriyle de ihtiyaç duyulan her alanda iyiliği ve toplumsal faydayı çoğaltmak için kararlılıkla çalışmaktadır.",
+  misyonumuz: "Eğitim hayatında desteğe ihtiyaç duyan gençlerin, yeteneklerini ve potansiyellerini özgüvenle açığa çıkarabilmeleri için şeffaf, güvenilir ve sürdürülebilir kaynaklar oluşturarak kalıcı katkı sağlamak.",
+  vizyonumuz: "Gönüllü ağımızın gücüyle eğitimde fırsat eşitliğini büyüten, toplumsal dayanışma kültürünü kökleştiren ve yetiştirdiği nesillerle geleceğe değer katan, öncü ve örnek bir sivil toplum kuruluşu olmak.",
   degerlerimiz: [
     {
       baslik: "Dayanışma",
@@ -22,6 +22,10 @@ export const kurumsalData = {
     {
       baslik: "Umut",
       aciklama: "Eğitimin hayatları değiştiren en güçlü değer olduğuna inanırız."
+    },
+    {
+      baslik: "Geleceğe Öncülük",
+      aciklama: "Gençlerimizin sadece bugünün öğrencileri değil, yarının vizyoner liderleri ve değer üreten bireyleri olması için ilham veririz."
     }
   ]
 };

@@ -50,7 +50,7 @@ export default function BursPage() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="max-w-xl mx-auto">
             {/* Web Uygulaması */}
             <div className="bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-fbiad-yellow transition-colors group text-center flex flex-col h-full">
               <div className="w-16 h-16 bg-fbiad-blue/10 text-fbiad-blue rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-fbiad-blue group-hover:text-white transition-colors">
@@ -60,28 +60,9 @@ export default function BursPage() {
               <p className="text-gray-600 mb-8 flex-grow">
                 Tarayıcınız üzerinden mevcut BurstaBugün altyapısına geçiş yaparak başvurularınızı yönetebilirsiniz.
               </p>
-              <Link href="#" className="w-full inline-flex items-center justify-center gap-2 bg-fbiad-dark-blue text-white font-bold py-3 px-6 rounded-lg hover:bg-fbiad-blue transition-colors">
+              <Link href="https://burs.fbiadvakfi.org" target="_blank" className="w-full inline-flex items-center justify-center gap-2 bg-fbiad-dark-blue text-white font-bold py-3 px-6 rounded-lg hover:bg-fbiad-blue transition-colors">
                 Portala Git <ExternalLink size={18} />
               </Link>
-            </div>
-
-            {/* Mobil Uygulama */}
-            <div className="bg-white p-8 rounded-2xl shadow-sm border-2 border-transparent hover:border-fbiad-yellow transition-colors group text-center flex flex-col h-full">
-              <div className="w-16 h-16 bg-fbiad-yellow/20 text-fbiad-yellow rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-fbiad-yellow group-hover:text-white transition-colors">
-                <Smartphone size={32} />
-              </div>
-              <h3 className="text-2xl font-bold text-fbiad-dark-blue mb-4">Mobil Uygulama</h3>
-              <p className="text-gray-600 mb-8 flex-grow">
-                Hareket halindeyken bildirimleri almak ve hızlı işlem yapmak için FBİAD Vakfı Burs mobil uygulamasını indirin.
-              </p>
-              <div className="flex flex-col gap-3">
-                <a href="#" className="w-full inline-flex items-center justify-center gap-2 border-2 border-fbiad-dark-blue text-fbiad-dark-blue font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors">
-                  App Store'dan İndir <ExternalLink size={18} />
-                </a>
-                <a href="#" className="w-full inline-flex items-center justify-center gap-2 border-2 border-fbiad-dark-blue text-fbiad-dark-blue font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors">
-                  Google Play'den İndir <ExternalLink size={18} />
-                </a>
-              </div>
             </div>
           </div>
         </section>
