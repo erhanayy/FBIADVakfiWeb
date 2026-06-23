@@ -461,6 +461,7 @@ export default function BagisPage() {
         message={alertConfig.message} 
         type={alertConfig.type} 
       />
+      <div className="text-center text-xs text-gray-400 pb-4">v1.2 - Moka 3D Secure Entegrasyonu</div>
     </div>
   );
 }
