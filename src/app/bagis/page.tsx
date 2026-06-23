@@ -12,6 +12,9 @@ export default function BagisPage() {
   const [donorEmail, setDonorEmail] = useState("");
   const [donorPhone, setDonorPhone] = useState("");
   const [cardNumber, setCardNumber] = useState("");
+  const [cardHolderName, setCardHolderName] = useState("");
+  const [expDate, setExpDate] = useState("");
+  const [cvv, setCvv] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isFbiadMember, setIsFbiadMember] = useState(false);
   const [wantsMembershipInfo, setWantsMembershipInfo] = useState(false);
@@ -54,11 +57,16 @@ export default function BagisPage() {
     setCardNumber(formatted);
   };
 
+  const handleExpDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length >= 3) {
+      value = `${value.slice(0, 2)}/${value.slice(2, 4)}`;
+    }
+    setExpDate(value);
+  };
+
   const simulateBankTransaction = async (cardNum: string) => {
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // Test kartı için her zaman başarılı dön
+    // Sadece 1111111111111111 için mock dönüş yap
     const cleanCard = cardNum.replace(/\s/g, '');
     if (cleanCard === '1111111111111111') {
       return {
@@ -68,11 +76,11 @@ export default function BagisPage() {
       };
     }
 
-    const isSuccess = Math.random() > 0.1; // %90 başarı şansı
+    // Normalde buraya düşmemeli çünkü handleSubmit'te yöneteceğiz.
     return {
-      success: isSuccess,
-      transactionId: isSuccess ? "TX-" + Date.now() : null,
-      bankCode: "BANK-001"
+      success: false,
+      transactionId: null,
+      bankCode: "API-YONLENDI"
     };
   };
 
@@ -95,48 +103,82 @@ export default function BagisPage() {
     setIsSubmitting(true);
     
     try {
-      // 1. Banka API Simülasyonu
-      const bankResult = await simulateBankTransaction(cardNumber);
+      const cleanCard = cardNumber.replace(/\s/g, '');
       
-      // 2. Kendi API'mize (ve oradan BurstaBugun'e) tüm işlemleri (başarılı/başarısız) gönder
-      const payload = {
-        amount: finalAmount,
-        donorName,
-        donorTc,
-        donorEmail,
-        donorPhone,
-        isAnonymous,
-        isFbiadMember,
-        wantsMembershipInfo,
-        bankTransactionId: bankResult.transactionId,
-        bankCode: bankResult.bankCode,
-        status: bankResult.success ? 'completed' : 'failed'
-      };
+      // MOCK TEST (1111 1111 1111 1111)
+      if (cleanCard === '1111111111111111') {
+        const bankResult = await simulateBankTransaction(cardNumber);
+        
+        const payload = {
+          amount: finalAmount,
+          donorName,
+          donorTc,
+          donorEmail,
+          donorPhone,
+          isAnonymous,
+          isFbiadMember,
+          wantsMembershipInfo,
+          bankTransactionId: bankResult.transactionId,
+          bankCode: bankResult.bankCode,
+          status: bankResult.success ? 'completed' : 'failed'
+        };
 
-      const response = await fetch('/api/donate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+        const response = await fetch('/api/donate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-      const data = await response.json();
+        const data = await response.json();
 
-      if (!bankResult.success) {
-        showAlert("Banka işlemi reddedildi. Lütfen kart bilgilerinizi kontrol ediniz.", "error");
+        if (response.ok && data.success) {
+          showAlert(`Bağışınız başarıyla alınmıştır. İşlem No: ${bankResult.transactionId}\nTeşekkür ederiz!`, "success", () => window.location.reload());
+        } else {
+          showAlert("İşleminiz kaydedilirken bir hata oluştu.", "error");
+        }
         setIsSubmitting(false);
         return;
       }
 
-      if (response.ok && data.success) {
-        showAlert(`Bağışınız başarıyla alınmıştır. İşlem No: ${bankResult.transactionId}\nTeşekkür ederiz!`, "success", () => window.location.reload());
+      // GERÇEK MOKA API (3D SECURE YÖNLENDİRMESİ)
+      const [expMonth, expYear] = expDate.split('/');
+      
+      const mokaPayload = {
+        cardInfo: {
+          cardHolderName,
+          cardNumber: cleanCard,
+          expMonth: expMonth || "01",
+          expYear: expYear || "30",
+          cvc: cvv
+        },
+        payload: {
+          adSoyad: donorName,
+          tekilTutar: finalAmount,
+          taksitMi: false,
+          fundId: 'fbiad-bagis',
+          plan: [{ id: `BAGIS-${Date.now()}` }]
+        }
+      };
+
+      const mokaRes = await fetch('/api/payment/moka-init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(mokaPayload)
+      });
+
+      const mokaData = await mokaRes.json();
+
+      if (mokaData.success && mokaData.redirectUrl) {
+        // Redirect to Moka 3D Secure page
+        window.location.href = mokaData.redirectUrl;
       } else {
-        showAlert("İşleminiz banka tarafından onaylandı ancak sisteme kaydedilirken bir hata oluştu.", "error");
-        console.error(data.error);
+        showAlert(mokaData.error || "Ödeme işlemi başlatılamadı. Lütfen kart bilgilerinizi kontrol ediniz.", "error");
+        setIsSubmitting(false);
       }
+
     } catch (error) {
       console.error("Payment error:", error);
       showAlert("Bir hata oluştu, lütfen internet bağlantınızı kontrol edip tekrar deneyiniz.", "error");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -299,7 +341,14 @@ export default function BagisPage() {
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-700">Kart Üzerindeki İsim</label>
-                      <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none uppercase" placeholder="KART SAHİBİ" />
+                      <input 
+                        type="text" 
+                        value={cardHolderName}
+                        onChange={(e) => setCardHolderName(e.target.value)}
+                        required
+                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none uppercase" 
+                        placeholder="KART SAHİBİ" 
+                      />
                     </div>
                     
                     <div className="space-y-2">
@@ -323,14 +372,30 @@ export default function BagisPage() {
                         <label className="text-sm font-semibold text-gray-700">Son Kullanma Tarihi</label>
                         <div className="relative">
                           <Calendar size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          <input type="text" maxLength={5} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="AA/YY" />
+                          <input 
+                            type="text" 
+                            value={expDate}
+                            onChange={handleExpDateChange}
+                            required
+                            maxLength={5} 
+                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" 
+                            placeholder="AA/YY" 
+                          />
                         </div>
                       </div>
                       <div className="space-y-2">
                         <label className="text-sm font-semibold text-gray-700">CVC / CVV</label>
                         <div className="relative">
                           <ShieldCheck size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                          <input type="text" maxLength={3} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="123" />
+                          <input 
+                            type="text" 
+                            value={cvv}
+                            onChange={(e) => setCvv(e.target.value.replace(/\D/g, ''))}
+                            required
+                            maxLength={4} 
+                            className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" 
+                            placeholder="123" 
+                          />
                         </div>
                       </div>
                     </div>
