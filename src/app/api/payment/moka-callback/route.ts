@@ -15,9 +15,7 @@ export async function POST(req: Request) {
         // We can check if Moka provides a success flag in the POST data, usually "resultCode" or "mdStatus".
         
         const url = new URL(req.url);
-        // Fallback to cookie if url param is empty (to avoid InvalidRedirectUrlLength)
-        const cookiePayload = req.headers.get('cookie')?.split('; ').find(row => row.startsWith('moka_payload='))?.split('=')[1];
-        const payloadBase64 = url.searchParams.get("payload") || cookiePayload;
+        const payloadBase64 = url.searchParams.get("payload");
 
         // The simplest way to know if Moka 3D succeeded is if mdStatus=1 or equivalent. Moka often sends `isSuccessful` or `resultCode`.
         // If we can't reliably parse Moka's 3D result, we can check `trxCode` and call DoCapture if IsPreAuth was 1, or just trust the payload for now.
@@ -30,7 +28,9 @@ export async function POST(req: Request) {
         const isError = entries.resultCode && entries.resultCode !== "Success" && entries.resultCode !== "";
         const isSuccess = !isError;
 
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
+        const host = req.headers.get("host") || "localhost:3005";
+        const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
         let redirectBaseUrl = `${appUrl}/app-payment`;
         let fundId = "";
 
@@ -59,17 +59,16 @@ export async function POST(req: Request) {
                 const parts = payloadStr.split('|');
                 const payload = {
                      fundId: parts[0] || "",
-                     plan: parts[1] ? parts[1].split(',').map((id: string) => ({ id })) : [],
-                     tekilTutar: Number(parts[2]) || 0,
-                     adSoyad: parts[3] || "",
-                     donorEmail: parts[4] || "",
-                     donorTc: parts[5] || "",
-                     donorPhone: parts[6] || "",
-                     isAnonymous: parts[7] === "1"
+                     userId: parts[1] || "",
+                     count: Number(parts[2]) || 0,
+                     tekilTutar: Number(parts[3]) || 0,
+                     adSoyad: parts[4] || "",
+                     donorEmail: parts[5] || "",
+                     donorTc: parts[6] || "",
+                     donorPhone: parts[7] || "",
+                     isAnonymous: parts[8] === "1"
                 };
 
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
-                
                 if (payload.fundId === 'fbiad-bagis') {
                     // Bu jenerik bir web bağışı, BurstaBugun'e web bağışı olarak kaydet
                     const donateUrl = `${appUrl}/api/donate`;
@@ -106,8 +105,10 @@ export async function POST(req: Request) {
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             fundId: payload.fundId,
+                            userId: payload.userId,
+                            count: payload.count,
                             transactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
-                            paymentIds: payload.plan ? payload.plan.map((p: any) => p.id) : []
+                            paymentIds: [] // Backwards compatibility if needed, but not used anymore
                         })
                     });
 

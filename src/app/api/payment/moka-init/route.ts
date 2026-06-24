@@ -16,12 +16,14 @@ export async function POST(req: Request) {
         
         // Limit url length to avoid Moka InvalidRedirectUrlLength error
         // We pack the payload into a pipe-delimited string instead of a fat JSON object.
-        // Format: fundId|planIds|tekilTutar|adSoyad|donorEmail|donorTc|donorPhone|isAnonymous
-        const planIds = payload.plan ? payload.plan.map((p: any) => p.id).join(',') : '';
-        const shortStr = `${payload.fundId || ''}|${planIds}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}`;
+        // Format: fundId|userId|planCount|tekilTutar|adSoyad|donorEmail|donorTc|donorPhone|isAnonymous
+        const planCount = payload.plan ? payload.plan.length : 0;
+        const shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}`;
         const payloadBase64 = Buffer.from(shortStr, 'utf8').toString('base64');
         
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
+        const host = req.headers.get("host") || "localhost:3005";
+        const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
 
         if (!dealerCode || !username || !password) {
             return NextResponse.json({ success: false, error: "Moka API credentials are not configured on the server." }, { status: 500 });
@@ -31,21 +33,7 @@ export async function POST(req: Request) {
         const rawCheckKey = `${dealerCode}MK${username}PD${password}`;
         const checkKey = crypto.createHash("sha256").update(rawCheckKey).digest("hex");
 
-        // Prepare Moka Request Payload
-        // Create a unique TrxCode to track this specific payment
-        // We will store fundId and paymentIds inside the OtherTrxCode, or save them in a DB.
-        // Wait, Moka limits OtherTrxCode length, usually 50 chars. We can send a stringified simple payload if it fits,
-        // or just generate a unique DB record here! Since FBIADVakfiWeb has no direct DB access to BurstaBugun, we can just pack it.
-        // Let's pack: fundId + "::" + paymentIds.join(',')
-        const paymentIdsStr = payload.plan.map((p: any) => p.id).join(",");
-        let trxCode = `${payload.fundId}::${paymentIdsStr}`;
-        if (trxCode.length > 50) {
-           // Fallback if too long, although UUID is 36 chars. Multiple UUIDs will exceed 50.
-           // In this scenario, we might just pass the first payment ID, and rely on webhook processing.
-           // But since FBIADVakfiWeb is stateless, how do we pass data back?
-           // We can pass the payload as a Base64 encoded string in the RedirectUrl query parameter!
-           trxCode = "MOKA-" + Date.now();
-        }
+        let trxCode = `MOKA-${Date.now()}`;
 
         const callbackUrl = `${appUrl}/api/payment/moka-callback`;
 
@@ -73,9 +61,8 @@ export async function POST(req: Request) {
                 IsPreAuth: 0,
                 IsTokenized: 0,
                 ReturnHash: 1,
-                // We no longer pass the payload in the URL to avoid Moka's 255 character limit.
-                // Instead, we will store it in a secure cookie.
-                RedirectUrl: callbackUrl,
+                // We pass the ultra-compact base64 encoded payload in RedirectUrl. Since it no longer contains UUIDs for installments, it easily fits the 255 char limit!
+                RedirectUrl: `${callbackUrl}?payload=${payloadBase64}`,
                 RedirectType: 0,
                 Description: `${payload.adSoyad} - Burs Bagisi`,
             }
@@ -94,17 +81,7 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (data.ResultCode === "Success" && data.Data && data.Data.Url) {
-            // Moka 3D redirect URL
-            // Set cookie before returning response
-            const res = NextResponse.json({ success: true, redirectUrl: data.Data.Url });
-            res.cookies.set('moka_payload', payloadBase64, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none',
-                maxAge: 60 * 15, // 15 minutes
-                path: '/'
-            });
-            return res;
+            return NextResponse.json({ success: true, redirectUrl: data.Data.Url });
         } else {
             console.error("Moka Request Failed:", JSON.stringify(data, null, 2));
             const errorMsg = data.ResultMessage || data.ResultCode || data.Exception || "Moka ödeme isteği başarısız oldu.";
