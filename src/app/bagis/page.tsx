@@ -60,7 +60,7 @@ export default function BagisPage() {
 
     // Test verilerini doldurmak için klavye kısayolu (Alt + Shift + T / Option + Shift + T)
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.altKey && e.shiftKey && e.key.toLowerCase() === 't') {
+      if (e.altKey && e.shiftKey && e.code === 'KeyT') {
         e.preventDefault();
         setAmount("custom");
         setCustomAmount("1");
