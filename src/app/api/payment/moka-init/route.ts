@@ -49,6 +49,8 @@ export async function POST(req: Request) {
 
         const callbackUrl = `${appUrl}/api/payment/moka-callback`;
 
+        const expYearStr = cardInfo.expYear.length === 2 ? `20${cardInfo.expYear}` : cardInfo.expYear;
+
         const mokaRequest = {
             PaymentDealerAuthentication: {
                 DealerCode: dealerCode,
