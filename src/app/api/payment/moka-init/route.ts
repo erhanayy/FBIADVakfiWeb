@@ -18,7 +18,15 @@ export async function POST(req: Request) {
         // We pack the payload into a pipe-delimited string instead of a fat JSON object.
         // Format: fundId|userId|planCount|tekilTutar|adSoyad|donorEmail|donorTc|donorPhone|isAnonymous
         const planCount = payload.plan ? payload.plan.length : 0;
-        const shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}`;
+        
+        let shortStr = '';
+        if (payload.fundId === 'fbiad-bagis') {
+            shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}`;
+        } else {
+            // For Burs payments, fundId and userId are UUIDs. We OMIT donor info to ensure Base64 string + RedirectUrl is < 255 chars!
+            shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}`;
+        }
+        
         const payloadBase64 = Buffer.from(shortStr, 'utf8').toString('base64');
         
         const host = req.headers.get("host") || "localhost:3005";
