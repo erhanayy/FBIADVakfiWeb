@@ -58,9 +58,9 @@ export default function BagisPage() {
       });
     }
 
-    // Test verilerini doldurmak için klavye kısayolu (Ctrl + Shift + T veya Cmd + Shift + T)
+    // Test verilerini doldurmak için klavye kısayolu (Alt + Shift + T / Option + Shift + T)
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 't') {
+      if (e.altKey && e.shiftKey && e.key.toLowerCase() === 't') {
         e.preventDefault();
         setAmount("custom");
         setCustomAmount("1");
