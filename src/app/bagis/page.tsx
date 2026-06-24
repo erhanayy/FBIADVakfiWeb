@@ -57,6 +57,33 @@ export default function BagisPage() {
         }
       });
     }
+
+    // Test verilerini doldurmak için klavye kısayolu (Ctrl + Shift + T veya Cmd + Shift + T)
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 't') {
+        e.preventDefault();
+        setAmount("custom");
+        setCustomAmount("1");
+        setDonorName("Erhan Ayyıldız");
+        setDonorTc("12345678901");
+        setDonorEmail("erhanayyildiz@hotmail.com");
+        setDonorPhone("05305146033");
+        setIsAnonymous(true);
+        setIsFbiadMember(false);
+        setWantsMembershipInfo(false);
+        setCardHolderName("ERHAN AYYILDIZ");
+        setCardNumber("5127 5411 2222 3332");
+        setExpDate("12/30");
+        setCvv("000");
+        setIsContractAccepted(true);
+        setIsNotRobot(true);
+        
+        showAlert("Test verileri form alanlarına dolduruldu!", "success");
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', onSuccess?: () => void) => {
