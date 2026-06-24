@@ -46,6 +46,7 @@ export default function BagisPage() {
       let errorMessage = 'Ödeme işlemi sırasında bir hata oluştu.';
       if (error === 'moka_failed') errorMessage = '3D Secure işlemi başarısız oldu veya reddedildi.';
       else if (error === 'system_error') errorMessage = 'Bağışınız alındı fakat sisteme kaydedilirken bir hata oluştu.';
+      else errorMessage = decodeURIComponent(error as string);
       
       setAlertConfig({
         isOpen: true,

@@ -46,7 +46,8 @@ export async function POST(req: Request) {
         }
 
         if (!isSuccess) {
-            return NextResponse.redirect(`${redirectBaseUrl}?error=moka_failed`, 302);
+            const errorMsg = entries.resultMessage || entries.resultCode || entries.ResultCode || "moka_failed";
+            return NextResponse.redirect(`${redirectBaseUrl}?error=${encodeURIComponent(errorMsg as string)}`, 302);
         }
 
         if (payloadBase64) {
