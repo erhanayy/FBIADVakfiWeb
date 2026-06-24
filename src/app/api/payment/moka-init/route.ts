@@ -62,7 +62,7 @@ export async function POST(req: Request) {
                 IsTokenized: 0,
                 ReturnHash: 1,
                 // We pass the ultra-compact base64 encoded payload in RedirectUrl. Since it no longer contains UUIDs for installments, it easily fits the 255 char limit!
-                RedirectUrl: `${callbackUrl}?payload=${payloadBase64}`,
+                RedirectUrl: `${callbackUrl}?payload=${encodeURIComponent(payloadBase64)}`,
                 RedirectType: 0,
                 Description: `${payload.adSoyad} - Burs Bagisi`,
             }
