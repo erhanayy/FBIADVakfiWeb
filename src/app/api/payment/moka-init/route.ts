@@ -4,6 +4,7 @@ import crypto from "crypto";
 export async function POST(req: Request) {
     try {
         const body = await req.json();
+        console.log("Incoming Moka payload:", JSON.stringify(body));
         const { cardInfo, payload } = body;
 
         // Use environment variables for Moka API credentials
@@ -53,7 +54,7 @@ export async function POST(req: Request) {
                 ExpMonth: cardInfo.expMonth,
                 ExpYear: cardInfo.expYear,
                 CvcNumber: cardInfo.cvc,
-                Amount: payload.toplamTutar || payload.tekilTutar || payload.amount || 0,
+                Amount: Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
                 Currency: "TL",
                 InstallmentNumber: 1, // Peşin
                 ClientIP: req.headers.get("x-forwarded-for") || "127.0.0.1",
@@ -68,6 +69,8 @@ export async function POST(req: Request) {
                 Description: `${payload.adSoyad} - Burs Bagisi`,
             }
         };
+
+        console.log("Outgoing Moka Request:", JSON.stringify(mokaRequest));
 
         const response = await fetch(`${apiUrl}/PaymentDealer/DoDirectPaymentThreeD`, {
             method: "POST",
