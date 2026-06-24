@@ -52,7 +52,7 @@ export async function POST(req: Request) {
                 CardHolderFullName: cardInfo.cardHolderName,
                 CardNumber: cardInfo.cardNumber.replace(/\s/g, ''),
                 ExpMonth: cardInfo.expMonth,
-                ExpYear: cardInfo.expYear,
+                ExpYear: cardInfo.expYear.length === 2 ? `20${cardInfo.expYear}` : cardInfo.expYear,
                 CvcNumber: cardInfo.cvc,
                 Amount: Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
                 Currency: "TL",
