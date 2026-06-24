@@ -13,6 +13,14 @@ export async function POST(req: Request) {
         const password = process.env.MOKA_PASSWORD || "";
         const isTestEnv = process.env.MOKA_IS_TEST === "true"; // default to production unless true
         const apiUrl = isTestEnv ? "https://service.refmokaunited.com" : "https://service.mokaunited.com";
+        
+        // Limit url length to avoid Moka InvalidRedirectUrlLength error
+        // We pack the payload into a pipe-delimited string instead of a fat JSON object.
+        // Format: fundId|planIds|tekilTutar|adSoyad|donorEmail|donorTc|donorPhone|isAnonymous
+        const planIds = payload.plan ? payload.plan.map((p: any) => p.id).join(',') : '';
+        const shortStr = `${payload.fundId || ''}|${planIds}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}`;
+        const payloadBase64 = Buffer.from(shortStr, 'utf8').toString('base64');
+        
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
 
         if (!dealerCode || !username || !password) {
@@ -63,8 +71,8 @@ export async function POST(req: Request) {
                 IsPreAuth: 0,
                 IsTokenized: 0,
                 ReturnHash: 1,
-                // We pass the full base64 encoded payload in RedirectUrl so we can decode it on callback
-                RedirectUrl: `${callbackUrl}?payload=${Buffer.from(JSON.stringify(payload)).toString('base64')}`,
+                // We pass the compact base64 encoded payload in RedirectUrl to avoid length limit
+                RedirectUrl: `${callbackUrl}?payload=${payloadBase64}`,
                 RedirectType: 0,
                 Description: `${payload.adSoyad} - Burs Bagisi`,
             }

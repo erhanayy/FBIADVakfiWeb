@@ -35,9 +35,10 @@ export async function POST(req: Request) {
         if (payloadBase64) {
              try {
                  const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
-                 const payload = JSON.parse(payloadStr);
-                 fundId = payload.fundId;
-                 if (payload.fundId === 'fbiad-bagis') {
+                 // Parse pipe-delimited short payload
+                 const parts = payloadStr.split('|');
+                 fundId = parts[0] || "";
+                 if (fundId === 'fbiad-bagis') {
                      redirectBaseUrl = `${appUrl}/bagis`;
                  }
              } catch (e) {
@@ -53,7 +54,17 @@ export async function POST(req: Request) {
         if (payloadBase64) {
             try {
                 const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
-                const payload = JSON.parse(payloadStr);
+                const parts = payloadStr.split('|');
+                const payload = {
+                     fundId: parts[0] || "",
+                     plan: parts[1] ? parts[1].split(',').map((id: string) => ({ id })) : [],
+                     tekilTutar: Number(parts[2]) || 0,
+                     adSoyad: parts[3] || "",
+                     donorEmail: parts[4] || "",
+                     donorTc: parts[5] || "",
+                     donorPhone: parts[6] || "",
+                     isAnonymous: parts[7] === "1"
+                };
 
                 const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
                 
