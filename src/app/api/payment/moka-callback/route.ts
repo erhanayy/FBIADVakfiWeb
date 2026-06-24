@@ -24,16 +24,29 @@ export async function POST(req: Request) {
         const entries = Object.fromEntries(formData.entries());
         console.log("MOKA CALLBACK RECEIVED:", entries);
 
-        // Moka usually sends "ResultCode" in the form data. If it's "Success", we process.
-        // Actually, if it's a 3D return, Moka might redirect with GET or POST.
-        // If it's successful, we call our own execute webhook!
+        // Moka often sends empty resultCode for success in 3D return, or "Success".
+        const isError = entries.resultCode && entries.resultCode !== "Success" && entries.resultCode !== "";
+        const isSuccess = !isError;
 
-        const isSuccess = entries.ResultCode === "Success" || entries.mdStatus === "1" || entries.mdStatus === "9" || entries.isSuccessful === "true" || entries.Hash?.toString().endsWith("T"); // We'll try to catch success broadly since Moka docs are brief on 3D return format.
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
+        let redirectBaseUrl = `${appUrl}/app-payment`;
+        let fundId = "";
+
+        if (payloadBase64) {
+             try {
+                 const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
+                 const payload = JSON.parse(payloadStr);
+                 fundId = payload.fundId;
+                 if (payload.fundId === 'fbiad-bagis') {
+                     redirectBaseUrl = `${appUrl}/bagis`;
+                 }
+             } catch (e) {
+                 console.error("Payload parse error", e);
+             }
+        }
 
         if (!isSuccess) {
-            // Redirect to failure page
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
-            return NextResponse.redirect(`${appUrl}/app-payment?error=moka_failed`, 302);
+            return NextResponse.redirect(`${redirectBaseUrl}?error=moka_failed`, 302);
         }
 
         if (payloadBase64) {
@@ -42,7 +55,6 @@ export async function POST(req: Request) {
                 const payload = JSON.parse(payloadStr);
 
                 // Call the BurstaBugun execute webhook
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
                 const executeUrl = `${appUrl}/api/app-payment/execute`;
                 
                 const executeRes = await fetch(executeUrl, {
@@ -50,16 +62,16 @@ export async function POST(req: Request) {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         fundId: payload.fundId,
-                        transactionId: entries.TrxCode || "MOKA-" + Date.now(),
+                        transactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
                         paymentIds: payload.plan.map((p: any) => p.id)
                     })
                 });
 
                 if (executeRes.ok) {
-                    return NextResponse.redirect(`${appUrl}/app-payment?success=true&fundId=${payload.fundId}`, 302);
+                    return NextResponse.redirect(`${redirectBaseUrl}?success=true&fundId=${payload.fundId}`, 302);
                 } else {
                     console.error("BurstaBugun execute failed", await executeRes.text());
-                    return NextResponse.redirect(`${appUrl}/app-payment?error=system_error`, 302);
+                    return NextResponse.redirect(`${redirectBaseUrl}?error=system_error`, 302);
                 }
             } catch (err) {
                 console.error("Payload decoding error", err);

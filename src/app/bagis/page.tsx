@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShieldCheck, Lock, CreditCard, User, Mail, Phone, Calendar, Hash } from "lucide-react";
 import { AlertModal } from "@/components/ui/AlertModal";
 
@@ -26,6 +26,37 @@ export default function BagisPage() {
     message: '',
     type: 'info'
   });
+
+  useEffect(() => {
+    // URL parametrelerini kontrol et (Moka'dan dönüş)
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    const error = urlParams.get('error');
+
+    if (success === 'true') {
+      setAlertConfig({
+        isOpen: true,
+        message: 'Bağışınız başarıyla gerçekleştirilmiştir. Eğitime verdiğiniz destek için teşekkür ederiz!',
+        type: 'success',
+        onSuccess: () => {
+          window.location.href = window.location.pathname; // Parametreleri temizle
+        }
+      });
+    } else if (error) {
+      let errorMessage = 'Ödeme işlemi sırasında bir hata oluştu.';
+      if (error === 'moka_failed') errorMessage = '3D Secure işlemi başarısız oldu veya reddedildi.';
+      else if (error === 'system_error') errorMessage = 'Bağışınız alındı fakat sisteme kaydedilirken bir hata oluştu.';
+      
+      setAlertConfig({
+        isOpen: true,
+        message: errorMessage,
+        type: 'error',
+        onSuccess: () => {
+          window.location.href = window.location.pathname; // Parametreleri temizle
+        }
+      });
+    }
+  }, []);
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', onSuccess?: () => void) => {
     setAlertConfig({ isOpen: true, message, type, onSuccess });
