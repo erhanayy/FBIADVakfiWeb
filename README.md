@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FBIADVakfiWeb (FBİAD Ana Web ve Bağış Sitesi)
 
-## Getting Started
+Bu proje, FBİAD Vakfı'nın ana web sitesi olup aynı zamanda tüm genel bağışları ve Burs (BurstaBugun) platformundan gelen Moka sanal pos ödemelerinin altyapısını yönetir.
 
-First, run the development server:
+## 🚀 Canlı Ortam (Deployment) Bilgileri
+
+Sistem Google Cloud Run üzerinde barındırılmaktadır. Yeni bir geliştirici sistemi devraldığında aşağıdaki bilgilere dikkat etmelidir:
+
+- **Google Cloud Projesi:** `dernektebugun-492221`
+- **Cloud Run Servis Adı:** `fbiad-web`
+- **Bölge (Region):** `europe-west1`
+- **Canlı (Custom) Domain:** `fbiadvakfi.org` ve `www.fbiadvakfi.org`
+
+### Nasıl Deploy Edilir?
+
+Terminalden projeyi deploy etmek için aşağıdaki komutu kullanmalısınız. **Uyarı:** `gcloud run deploy --set-env-vars` komutu ortam değişkenlerini **üzerine yazar (ezerek siler)**. Bu nedenle canlı şifreleri kaybetmemek için ya konsol üzerinden manuel deploy yapın ya da `--update-env-vars` komutunu kullanın. Örnek deploy komutu:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+gcloud run deploy fbiad-web \
+  --source . \
+  --project dernektebugun-492221 \
+  --region europe-west1 \
+  --allow-unauthenticated
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🗄️ Veritabanı Bilgileri
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Bu proje, temel bağış ve ödeme işlemlerini yürüttüğü için **şu anlık harici bir Cloud SQL veritabanına doğrudan bağlı değildir**. Ödemeler ve form kayıtları, ilgili CRM veya 3. parti API'lere POST edilir. 
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## ⚙️ Moka Ödeme Entegrasyonu ve Mimari Notlar
 
-## Learn More
+Bu projenin en kritik altyapılarından biri **Moka Sanal Pos** entegrasyonudur. Sistem sadece kendi (`/bagis`) sayfasından gelen ödemeleri değil, aynı zamanda `BurstaBugun` projesinden yönlendirilen (`/app-payment`) ödemeleri de yönetir.
 
-To learn more about Next.js, take a look at the following resources:
+1. **Burs Yönlendirmesi:** `BurstaBugun` uygulamasındaki kullanıcı ödeme ekranına geçtiğinde, oluşturulan `token` ile beraber bu projeye (`fbiadvakfi.org/app-payment`) gelir.
+2. **Kısa Payload Mimarisi:** Moka, `RedirectUrl` parametresinde maksimum **255 karakter** destekler. Bu nedenle `/api/payment/moka-init` adresinde ödeme payload'u `base64url` formatında çok kısa bir string olarak (örn: `fbiad-bagis|BAGIS-1234|...`) şifrelenir.
+3. **Moka Callback:** Kullanıcı Moka 3D Secure sayfasından sonra `/api/payment/moka-callback` adresine geri döner. Bu sunucu `base64url` verisini tekrar çözer, eğer ödeme "Burs" kaynaklıysa, başarılı olduktan sonra kullanıcıyı `burs.fbiadvakfi.org/dashboard/...` adresine (Panele) yönlendirir.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*Dikkat: Server Component'lerde güvenlik gereği `onClick` gibi client-side fonksiyonlar kullanılmaz, yönlendirmeler `<a href>` ile yapılmalıdır.*
