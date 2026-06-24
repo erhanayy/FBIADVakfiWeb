@@ -212,6 +212,10 @@ export default function BagisPage() {
         },
         payload: {
           adSoyad: donorName,
+          donorEmail,
+          donorTc,
+          donorPhone,
+          isAnonymous,
           tekilTutar: finalAmount,
           taksitMi: false,
           fundId: 'fbiad-bagis',

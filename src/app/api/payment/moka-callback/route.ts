@@ -55,24 +55,55 @@ export async function POST(req: Request) {
                 const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
                 const payload = JSON.parse(payloadStr);
 
-                // Call the BurstaBugun execute webhook
-                const executeUrl = `${appUrl}/api/app-payment/execute`;
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://burs.fbiadvakfi.org";
                 
-                const executeRes = await fetch(executeUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        fundId: payload.fundId,
-                        transactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
-                        paymentIds: payload.plan.map((p: any) => p.id)
-                    })
-                });
+                if (payload.fundId === 'fbiad-bagis') {
+                    // Bu jenerik bir web bağışı, BurstaBugun'e web bağışı olarak kaydet
+                    const donateUrl = `${appUrl}/api/donate`;
+                    const donateRes = await fetch(donateUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            amount: payload.tekilTutar,
+                            donorName: payload.adSoyad,
+                            donorTc: payload.donorTc || '',
+                            donorEmail: payload.donorEmail || '',
+                            donorPhone: payload.donorPhone || '',
+                            isAnonymous: payload.isAnonymous || false,
+                            isFbiadMember: false,
+                            wantsMembershipInfo: false,
+                            bankTransactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
+                            bankCode: "MOKA",
+                            status: "completed"
+                        })
+                    });
 
-                if (executeRes.ok) {
-                    return NextResponse.redirect(`${redirectBaseUrl}?success=true&fundId=${payload.fundId}`, 302);
+                    if (donateRes.ok) {
+                        return NextResponse.redirect(`${redirectBaseUrl}?success=true&fundId=${payload.fundId}`, 302);
+                    } else {
+                        console.error("Donate API failed", await donateRes.text());
+                        return NextResponse.redirect(`${redirectBaseUrl}?error=system_error`, 302);
+                    }
                 } else {
-                    console.error("BurstaBugun execute failed", await executeRes.text());
-                    return NextResponse.redirect(`${redirectBaseUrl}?error=system_error`, 302);
+                    // Bu bir Burs (Tenant) ödemesi, BurstaBugun execute webhook'una gönder
+                    const executeUrl = `${appUrl}/api/app-payment/execute`;
+                    
+                    const executeRes = await fetch(executeUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fundId: payload.fundId,
+                            transactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
+                            paymentIds: payload.plan ? payload.plan.map((p: any) => p.id) : []
+                        })
+                    });
+
+                    if (executeRes.ok) {
+                        return NextResponse.redirect(`${redirectBaseUrl}?success=true&fundId=${payload.fundId}`, 302);
+                    } else {
+                        console.error("BurstaBugun execute failed", await executeRes.text());
+                        return NextResponse.redirect(`${redirectBaseUrl}?error=system_error`, 302);
+                    }
                 }
             } catch (err) {
                 console.error("Payload decoding error", err);
