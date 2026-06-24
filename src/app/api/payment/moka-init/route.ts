@@ -53,7 +53,7 @@ export async function POST(req: Request) {
                 ExpMonth: cardInfo.expMonth,
                 ExpYear: cardInfo.expYear,
                 CvcNumber: cardInfo.cvc,
-                Amount: payload.taksitMi ? payload.tekilTutar : payload.toplamTutar,
+                Amount: payload.toplamTutar || payload.tekilTutar || payload.amount || 0,
                 Currency: "TL",
                 InstallmentNumber: 1, // Peşin
                 ClientIP: req.headers.get("x-forwarded-for") || "127.0.0.1",
@@ -83,8 +83,9 @@ export async function POST(req: Request) {
             // Moka 3D redirect URL
             return NextResponse.json({ success: true, redirectUrl: data.Data.Url });
         } else {
-            console.error("Moka Request Failed:", data);
-            return NextResponse.json({ success: false, error: data.ResultMessage || data.Exception || "Moka ödeme isteği başarısız oldu." }, { status: 400 });
+            console.error("Moka Request Failed:", JSON.stringify(data, null, 2));
+            const errorMsg = data.ResultMessage || data.ResultCode || data.Exception || "Moka ödeme isteği başarısız oldu.";
+            return NextResponse.json({ success: false, error: errorMsg, details: data }, { status: 400 });
         }
 
     } catch (error: any) {
