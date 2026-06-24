@@ -14,9 +14,6 @@ export async function POST(req: Request) {
         const isTestEnv = process.env.MOKA_IS_TEST === "true"; // default to production unless true
         const apiUrl = isTestEnv ? "https://service.refmokaunited.com" : "https://service.mokaunited.com";
         
-        // Limit url length to avoid Moka InvalidRedirectUrlLength error
-        // We pack the payload into a pipe-delimited string instead of a fat JSON object.
-        // Format: fundId|userId|planCount|tekilTutar|adSoyad|donorEmail|donorTc|donorPhone|isAnonymous
         const planCount = payload.plan ? payload.plan.length : 0;
         
         let shortStr = '';
@@ -27,7 +24,8 @@ export async function POST(req: Request) {
             shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}`;
         }
         
-        const payloadBase64 = Buffer.from(shortStr, 'utf8').toString('base64');
+        // Use base64url to avoid special URL characters (+, /, =) which might crash Moka's ASP.NET backend
+        const payloadBase64 = Buffer.from(shortStr, 'utf8').toString('base64url');
         
         const host = req.headers.get("host") || "localhost:3005";
         const protocol = req.headers.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");

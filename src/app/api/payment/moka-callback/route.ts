@@ -36,7 +36,7 @@ export async function POST(req: Request) {
 
         if (payloadBase64) {
              try {
-                 const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
+                 const payloadStr = Buffer.from(payloadBase64, 'base64url').toString('utf8');
                  // Parse pipe-delimited short payload
                  const parts = payloadStr.split('|');
                  fundId = parts[0] || "";
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
 
         if (payloadBase64) {
             try {
-                const payloadStr = Buffer.from(payloadBase64, 'base64').toString('utf8');
+                const payloadStr = Buffer.from(payloadBase64, 'base64url').toString('utf8');
                 const parts = payloadStr.split('|');
                 const payload = {
                      fundId: parts[0] || "",
