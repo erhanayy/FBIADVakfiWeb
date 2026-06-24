@@ -24,16 +24,12 @@ export default async function AppPaymentPage(props: { searchParams: Promise<{ to
               Destekleriniz için teşekkür ederiz. İşleminize devam edebilirsiniz.
             </p>
             <div className="flex flex-col gap-3 justify-center items-center">
-              <button 
-                onClick={() => {
-                  if (typeof window !== 'undefined') {
-                    window.location.href = `http://localhost:3000/dashboard/funds/${fundId}/payment`;
-                  }
-                }} 
-                className="bg-fbiad-dark-blue hover:bg-fbiad-blue text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full max-w-xs"
+              <a 
+                href={`https://burs.fbiadvakfi.org/dashboard/funds/${fundId}/payment`}
+                className="inline-block bg-fbiad-dark-blue hover:bg-fbiad-blue text-white font-bold py-3 px-8 rounded-xl transition-all shadow-md w-full max-w-xs text-center"
               >
-                Panele Geri Dön (Web)
-              </button>
+                Panele Geri Dön
+              </a>
             </div>
           </div>
         </div>
