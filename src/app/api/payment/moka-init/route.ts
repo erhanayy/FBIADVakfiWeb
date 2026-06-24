@@ -60,7 +60,7 @@ export async function POST(req: Request) {
                 CardHolderFullName: cardInfo.cardHolderName,
                 CardNumber: cardInfo.cardNumber.replace(/\s/g, ''),
                 ExpMonth: cardInfo.expMonth,
-                ExpYear: cardInfo.expYear.length === 2 ? `20${cardInfo.expYear}` : cardInfo.expYear,
+                ExpYear: expYearStr,
                 CvcNumber: cardInfo.cvc,
                 Amount: Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
                 Currency: "TL",
@@ -71,8 +71,9 @@ export async function POST(req: Request) {
                 IsPreAuth: 0,
                 IsTokenized: 0,
                 ReturnHash: 1,
-                // We pass the compact base64 encoded payload in RedirectUrl to avoid length limit
-                RedirectUrl: `${callbackUrl}?payload=${payloadBase64}`,
+                // We no longer pass the payload in the URL to avoid Moka's 255 character limit.
+                // Instead, we will store it in a secure cookie.
+                RedirectUrl: callbackUrl,
                 RedirectType: 0,
                 Description: `${payload.adSoyad} - Burs Bagisi`,
             }
@@ -92,7 +93,16 @@ export async function POST(req: Request) {
 
         if (data.ResultCode === "Success" && data.Data && data.Data.Url) {
             // Moka 3D redirect URL
-            return NextResponse.json({ success: true, redirectUrl: data.Data.Url });
+            // Set cookie before returning response
+            const res = NextResponse.json({ success: true, redirectUrl: data.Data.Url });
+            res.cookies.set('moka_payload', payloadBase64, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'none',
+                maxAge: 60 * 15, // 15 minutes
+                path: '/'
+            });
+            return res;
         } else {
             console.error("Moka Request Failed:", JSON.stringify(data, null, 2));
             const errorMsg = data.ResultMessage || data.ResultCode || data.Exception || "Moka ödeme isteği başarısız oldu.";

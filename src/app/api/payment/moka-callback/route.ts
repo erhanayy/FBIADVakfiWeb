@@ -15,7 +15,9 @@ export async function POST(req: Request) {
         // We can check if Moka provides a success flag in the POST data, usually "resultCode" or "mdStatus".
         
         const url = new URL(req.url);
-        const payloadBase64 = url.searchParams.get("payload");
+        // Fallback to cookie if url param is empty (to avoid InvalidRedirectUrlLength)
+        const cookiePayload = req.headers.get('cookie')?.split('; ').find(row => row.startsWith('moka_payload='))?.split('=')[1];
+        const payloadBase64 = url.searchParams.get("payload") || cookiePayload;
 
         // The simplest way to know if Moka 3D succeeded is if mdStatus=1 or equivalent. Moka often sends `isSuccessful` or `resultCode`.
         // If we can't reliably parse Moka's 3D result, we can check `trxCode` and call DoCapture if IsPreAuth was 1, or just trust the payload for now.
