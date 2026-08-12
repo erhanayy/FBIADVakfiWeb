@@ -57,7 +57,7 @@ export async function POST(req: Request) {
             try {
                 const payloadStr = Buffer.from(payloadBase64, 'base64url').toString('utf8');
                 const parts = payloadStr.split('|');
-                const payload = {
+                 const payload = {
                      fundId: parts[0] || "",
                      userId: parts[1] || "",
                      count: Number(parts[2]) || 0,
@@ -66,7 +66,8 @@ export async function POST(req: Request) {
                      donorEmail: parts[5] || "",
                      donorTc: parts[6] || "",
                      donorPhone: parts[7] || "",
-                     isAnonymous: parts[8] === "1"
+                     isAnonymous: parts[8] === "1",
+                     agreementsAccepted: parts[9] === "1"
                 };
 
                 if (payload.fundId === 'fbiad-bagis') {
@@ -86,6 +87,7 @@ export async function POST(req: Request) {
                             wantsMembershipInfo: false,
                             bankTransactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
                             bankCode: "MOKA",
+                            agreementsAccepted: payload.agreementsAccepted,
                             status: "completed"
                         })
                     });

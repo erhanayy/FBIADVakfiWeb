@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         
         let shortStr = '';
         if (payload.fundId === 'fbiad-bagis') {
-            shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}`;
+            shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}|${payload.agreementsAccepted === 1 ? 1 : 0}`;
         } else {
             // For Burs payments, fundId and userId are UUIDs. We OMIT donor info to ensure Base64 string + RedirectUrl is < 255 chars!
             shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}`;

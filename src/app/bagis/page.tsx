@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { ShieldCheck, Lock, CreditCard, User, Mail, Phone, Calendar, Hash } from "lucide-react";
 import { AlertModal } from "@/components/ui/AlertModal";
+import { ContractModal } from "@/components/ui/ContractModal";
 
 export default function BagisPage() {
   const [amount, setAmount] = useState<number | string>("");
@@ -18,9 +19,15 @@ export default function BagisPage() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isFbiadMember, setIsFbiadMember] = useState(false);
   const [wantsMembershipInfo, setWantsMembershipInfo] = useState(false);
-  const [isContractAccepted, setIsContractAccepted] = useState(false);
   const [isNotRobot, setIsNotRobot] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Contracts state
+  const [contractsData, setContractsData] = useState<{ kvkk?: any, agreement?: any }>({});
+  const [kvkkAccepted, setKvkkAccepted] = useState(false);
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
+  const [activeModal, setActiveModal] = useState<'kvkk' | 'agreement' | null>(null);
+
   const [alertConfig, setAlertConfig] = useState<{isOpen: boolean, message: string, type: 'success' | 'error' | 'warning' | 'info', onSuccess?: () => void}>({
     isOpen: false,
     message: '',
@@ -28,6 +35,18 @@ export default function BagisPage() {
   });
 
   useEffect(() => {
+    // Fetch contracts
+    fetch('/api/contracts?types=WEB_KVKK,WEB_DONATION_AGREEMENT')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.data) {
+          const kvkk = data.data.find((c: any) => c.type === 'WEB_KVKK');
+          const agreement = data.data.find((c: any) => c.type === 'WEB_DONATION_AGREEMENT');
+          setContractsData({ kvkk, agreement });
+        }
+      })
+      .catch(err => console.error("Contracts fetch error:", err));
+
     // URL parametrelerini kontrol et (Moka'dan dönüş)
     const urlParams = new URLSearchParams(window.location.search);
     const success = urlParams.get('success');
@@ -75,7 +94,8 @@ export default function BagisPage() {
         setCardNumber("5127 5411 2222 3332");
         setExpDate("12/30");
         setCvv("000");
-        setIsContractAccepted(true);
+        setKvkkAccepted(true);
+        setAgreementAccepted(true);
         setIsNotRobot(true);
         
         showAlert("Test verileri form alanlarına dolduruldu!", "success");
@@ -145,8 +165,8 @@ export default function BagisPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isContractAccepted) {
-      showAlert("Lütfen Bağış Sözleşmesini onaylayınız.", "warning");
+    if (!kvkkAccepted || !agreementAccepted) {
+      showAlert("Lütfen Aydınlatma Metnini ve Bağış Sözleşmesini okuyup onaylayınız.", "warning");
       return;
     }
     if (!isNotRobot) {
@@ -179,6 +199,7 @@ export default function BagisPage() {
           wantsMembershipInfo,
           bankTransactionId: bankResult.transactionId,
           bankCode: bankResult.bankCode,
+          agreementsAccepted: true,
           status: bankResult.success ? 'completed' : 'failed'
         };
 
@@ -219,6 +240,7 @@ export default function BagisPage() {
           tekilTutar: finalAmount,
           taksitMi: false,
           fundId: 'fbiad-bagis',
+          agreementsAccepted: 1,
           plan: [{ id: `BAGIS-${Date.now()}` }]
         }
       };
@@ -466,22 +488,36 @@ export default function BagisPage() {
                 </div>
               </section>
 
-              {/* Onay ve Güvenlik (Captcha Mockup) */}
+              {/* Onay ve Güvenlik */}
               <section className="space-y-6 pt-4">
                 
-                {/* Bağış Sözleşmesi */}
-                <div className="flex items-start gap-3">
-                  <input 
-                    type="checkbox" 
-                    id="contract" 
-                    required
-                    checked={isContractAccepted}
-                    onChange={(e) => setIsContractAccepted(e.target.checked)}
-                    className="mt-1 w-5 h-5 text-fbiad-blue rounded border-gray-300 focus:ring-fbiad-blue cursor-pointer" 
-                  />
-                  <label htmlFor="contract" className="text-sm text-gray-600 cursor-pointer">
-                    <a href="#" className="text-fbiad-blue font-semibold hover:underline">Bağış Aydınlatma Metnini</a> ve <a href="#" className="text-fbiad-blue font-semibold hover:underline">Bağış Sözleşmesini</a> okudum ve kabul ediyorum.
-                  </label>
+                {/* Sözleşmeler */}
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveModal('kvkk')}
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 ${kvkkAccepted ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 bg-white hover:border-fbiad-blue text-gray-700'} transition-all w-full text-left`}
+                  >
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${kvkkAccepted ? 'border-green-500 bg-green-500 text-white' : 'border-gray-300'}`}>
+                      {kvkkAccepted && <ShieldCheck size={16} />}
+                    </div>
+                    <span className="font-semibold text-sm">
+                      <span className="text-fbiad-blue underline">Bağış Aydınlatma Metni'ni</span> okudum ve onaylıyorum.
+                    </span>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => setActiveModal('agreement')}
+                    className={`flex items-center gap-3 p-4 rounded-xl border-2 ${agreementAccepted ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 bg-white hover:border-fbiad-blue text-gray-700'} transition-all w-full text-left`}
+                  >
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-colors ${agreementAccepted ? 'border-green-500 bg-green-500 text-white' : 'border-gray-300'}`}>
+                      {agreementAccepted && <ShieldCheck size={16} />}
+                    </div>
+                    <span className="font-semibold text-sm">
+                      <span className="text-fbiad-blue underline">Bağış Sözleşmesi'ni</span> okudum ve onaylıyorum.
+                    </span>
+                  </button>
                 </div>
 
                 {/* Robot Değilim Mockup */}
@@ -517,6 +553,24 @@ export default function BagisPage() {
         </div>
 
       </div>
+      
+      <ContractModal 
+        isOpen={activeModal === 'kvkk'}
+        onClose={() => setActiveModal(null)}
+        title={contractsData.kvkk?.title || "Bağış Aydınlatma Metni"}
+        content={contractsData.kvkk?.content || "Metin yüklenemedi. Lütfen internet bağlantınızı kontrol ediniz."}
+        onAccept={() => setKvkkAccepted(true)}
+        isAccepted={kvkkAccepted}
+      />
+      
+      <ContractModal 
+        isOpen={activeModal === 'agreement'}
+        onClose={() => setActiveModal(null)}
+        title={contractsData.agreement?.title || "Bağış Sözleşmesi"}
+        content={contractsData.agreement?.content || "Metin yüklenemedi. Lütfen internet bağlantınızı kontrol ediniz."}
+        onAccept={() => setAgreementAccepted(true)}
+        isAccepted={agreementAccepted}
+      />
       
       <AlertModal 
         isOpen={alertConfig.isOpen} 
