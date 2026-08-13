@@ -46,6 +46,10 @@ export default function Footer() {
                 <span className="block font-medium text-white mb-1">E-Posta:</span>
                 <a href="mailto:info@fbiad.org" className="hover:text-white transition-colors">info@fbiad.org</a>
               </li>
+              <li className="pt-2">
+                <span className="block font-medium text-white mb-1">Telefon:</span>
+                <a href="tel:02129631907" className="hover:text-white transition-colors">0212 963 19 07</a>
+              </li>
             </ul>
           </div>
         </div>
