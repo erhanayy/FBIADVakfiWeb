@@ -410,6 +410,10 @@ export default function BagisPage() {
                   <h2 className="text-xl font-bold text-fbiad-dark-blue flex items-center gap-2">
                     <span className="bg-fbiad-yellow text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">3</span> 
                     Ödeme Bilgileri
+                    <div className="flex items-center gap-2 ml-2">
+                      <img src="https://cdn.jsdelivr.net/npm/payment-icons@1.2.6/min/flat/visa.svg" alt="Visa" className="h-6" />
+                      <img src="https://cdn.jsdelivr.net/npm/payment-icons@1.2.6/min/flat/mastercard.svg" alt="Mastercard" className="h-6" />
+                    </div>
                   </h2>
                   <div className="flex flex-col items-end gap-1">
                     <div className="flex items-center gap-2 text-green-600">
