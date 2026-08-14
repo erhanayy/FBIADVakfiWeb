@@ -326,7 +326,7 @@ export default function BagisPage() {
               <section>
                 <h2 className="text-xl font-bold text-fbiad-dark-blue mb-6 flex items-center gap-2">
                   <span className="bg-fbiad-yellow text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span> 
-                  Kişisel Bilgileriniz
+                  Kişisel Bilgileriniz (Opsiyonel)
                 </h2>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -334,7 +334,7 @@ export default function BagisPage() {
                     <label className="text-sm font-semibold text-gray-700">Ad Soyad</label>
                     <div className="relative">
                       <User size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="text" value={donorName} onChange={(e) => setDonorName(e.target.value)} required className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="Örn: Ahmet Yılmaz" />
+                      <input type="text" value={donorName} onChange={(e) => setDonorName(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="Örn: Ahmet Yılmaz" />
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -348,14 +348,14 @@ export default function BagisPage() {
                     <label className="text-sm font-semibold text-gray-700">E-Posta Adresi</label>
                     <div className="relative">
                       <Mail size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} required className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="Örn: ahmet@mail.com" />
+                      <input type="email" value={donorEmail} onChange={(e) => setDonorEmail(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="Örn: ahmet@mail.com" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-gray-700">Telefon Numarası</label>
                     <div className="relative">
                       <Phone size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                      <input type="tel" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} required className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="Örn: 05XX XXX XX XX" />
+                      <input type="tel" value={donorPhone} onChange={(e) => setDonorPhone(e.target.value)} className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 focus:border-fbiad-blue focus:ring-2 focus:ring-fbiad-blue/20 outline-none" placeholder="Örn: 05XX XXX XX XX" />
                     </div>
                   </div>
                 </div>
