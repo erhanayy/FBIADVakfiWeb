@@ -39,7 +39,7 @@ export default async function AppPaymentPage(props: { searchParams: Promise<{ to
 
   // Moka'dan hatalı dönüş
   if (error) {
-    let errorMessage = "Ödeme işlemi sırasında bir hata oluştu.";
+    let errorMessage = error;
     if (error === 'moka_failed') errorMessage = "3D Secure işlemi başarısız oldu veya reddedildi.";
     if (error === 'system_error') errorMessage = "Ödeme bankadan onaylandı ancak sisteme kaydedilirken bir sorun oluştu.";
 
@@ -54,10 +54,10 @@ export default async function AppPaymentPage(props: { searchParams: Promise<{ to
           <h1 className="text-xl font-bold text-red-600 mb-2">İşlem Başarısız</h1>
           <p className="text-gray-600 mb-6">{errorMessage}</p>
           <a 
-            href="fbiadapp://payment-failed"
+            href="https://burs.fbiadvakfi.org/dashboard/funds"
             className="inline-block bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-xl transition-all shadow-sm w-full"
           >
-            Uygulamaya Geri Dön
+            Panele Geri Dön
           </a>
         </div>
       </div>
@@ -97,10 +97,10 @@ export default async function AppPaymentPage(props: { searchParams: Promise<{ to
           <h1 className="text-xl font-bold text-red-600 mb-2">Oturum Süresi Doldu</h1>
           <p className="text-gray-600 mb-6">Güvenliğiniz için ödeme linkinin süresi (15 dk) dolmuştur. Lütfen uygulamaya dönerek yeniden "Öde" butonuna tıklayınız.</p>
           <a 
-            href="fbiadapp://payment-failed"
+            href="https://burs.fbiadvakfi.org/dashboard/funds"
             className="inline-block bg-fbiad-dark-blue hover:bg-fbiad-blue text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md w-full"
           >
-            Uygulamaya Geri Dön
+            Panele Geri Dön
           </a>
         </div>
       </div>
