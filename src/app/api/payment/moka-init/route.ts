@@ -60,7 +60,7 @@ export async function POST(req: Request) {
                 CvcNumber: cardInfo.cvc,
                 Amount: Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
                 Currency: "TL",
-                InstallmentNumber: 1, // Peşin
+                InstallmentNumber: (payload.taksitMi && payload.plan && payload.plan.length > 1) ? payload.plan.length : 1,
                 ClientIP: req.headers.get("x-forwarded-for") || "127.0.0.1",
                 OtherTrxCode: trxCode,
                 IsPoolPayment: 0,
