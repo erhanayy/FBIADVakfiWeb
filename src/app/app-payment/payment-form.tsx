@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { ShieldCheck, Lock, CreditCard, User, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShieldCheck, Lock, CreditCard, User, Calendar, HelpCircle, CheckCircle, AlertCircle } from "lucide-react";
 import { AlertModal } from "@/components/ui/AlertModal";
+import { BankInstallmentRule, getBankRule } from "@/lib/bank-installments";
 
 type PaymentPayload = {
   fundId: string;
@@ -34,6 +35,14 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
     type: 'info'
   });
 
+  // New states for BIN detection and Payment Options
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'installment'>(payload.taksitMi ? 'installment' : 'cash');
+  const [bankRule, setBankRule] = useState<BankInstallmentRule | null>(null);
+  const [isCheckingBin, setIsCheckingBin] = useState(false);
+  const [binError, setBinError] = useState<string | null>(null);
+  const [detectedBankName, setDetectedBankName] = useState<string | null>(null);
+  const [detectedCategory, setDetectedCategory] = useState<string | null>(null);
+
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', onSuccess?: () => void) => {
     setAlertConfig({ isOpen: true, message, type, onSuccess });
   };
@@ -51,6 +60,53 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
     const formatted = value.replace(/(\d{4})(?=\d)/g, '$1 ');
     setCardNumber(formatted);
   };
+
+  useEffect(() => {
+    const cleanCard = cardNumber.replace(/\s/g, '');
+    if (cleanCard.length >= 6) {
+      const bin = cleanCard.substring(0, 6);
+      
+      // Prevent re-checking if we already checked this BIN
+      if (typeof window !== 'undefined' && (window as any)._lastCheckedBin === bin) return;
+      (window as any)._lastCheckedBin = bin;
+
+      setIsCheckingBin(true);
+      setBinError(null);
+
+      fetch('/api/payment/moka-bin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ binNumber: bin })
+      })
+      .then(res => res.json())
+      .then(data => {
+        setIsCheckingBin(false);
+        if (data.success && data.data) {
+          setDetectedBankName(data.data.bankName);
+          setDetectedCategory(data.data.productCategory);
+          const rule = getBankRule(data.data.bankName, data.data.groupName);
+          setBankRule(rule);
+
+          if (rule && !rule.isSupported && paymentMethod === 'installment') {
+            setBinError(`Bankanız (${rule.bankName}) taksitli işlemleri desteklememektedir.`);
+          }
+        } else {
+          setBankRule(null);
+          setDetectedBankName(null);
+        }
+      })
+      .catch(err => {
+        setIsCheckingBin(false);
+        console.error("BIN query failed", err);
+      });
+    } else {
+      setBankRule(null);
+      setBinError(null);
+      setDetectedBankName(null);
+      setDetectedCategory(null);
+      (window as any)._lastCheckedBin = null;
+    }
+  }, [cardNumber, paymentMethod]);
 
   const simulateBankTransaction = async (cardNum: string) => {
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -111,6 +167,16 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
           return;
         }
 
+        if (paymentMethod === 'installment' && bankRule && !bankRule.isSupported) {
+          showAlert(`Bankanız (${bankRule.bankName}) taksitli işlemleri desteklememektedir. Lütfen Tek Çekim (Peşin) ödemeyi seçiniz.`, "warning");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const maxBankInstallments = bankRule ? (detectedCategory === 'Ticari' ? bankRule.commercialMax : bankRule.individualMax) : 1;
+        const requestedInstallments = payload.plan.length > 0 ? payload.plan.length : 1;
+        const finalInstallmentCount = paymentMethod === 'installment' ? Math.min(requestedInstallments, maxBankInstallments) : 1;
+
         const [expMonth, expYearPrefix] = expDate.split('/');
         const expYear = "20" + expYearPrefix; // Converts "25" to "2025"
 
@@ -125,7 +191,8 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               expYear,
               cvc
             },
-            payload
+            payload,
+            installmentCount: finalInstallmentCount
           })
         });
 
@@ -215,35 +282,115 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               )}
             </div>
 
-            {payload.plan && payload.plan.length > 0 && (
+            {payload.taksitMi && payload.plan && payload.plan.length > 0 && (
               <div className="mt-8">
-                <h3 className="text-md font-bold text-gray-800 mb-3">Kapatılacak Ödeme Planı (Taksitler)</h3>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700">
-                      <tr>
-                        <th className="px-4 py-3 font-semibold">Tarih</th>
-                        <th className="px-4 py-3 font-semibold text-right">Tutar</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {payload.plan.map((item, index) => {
-                        const dateObj = new Date(item.date);
-                        const dateStr = dateObj.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
-                        return (
-                          <tr key={item.id} className="hover:bg-gray-50">
-                            <td suppressHydrationWarning className="px-4 py-3 text-gray-600">
-                              <span className="font-medium">{index + 1}. Taksit</span> - {dateStr}
-                            </td>
-                            <td className="px-4 py-3 text-right font-bold text-fbiad-dark-blue">
-                              {item.amount.toLocaleString('tr-TR')} ₺
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                <div className="flex items-center gap-2 mb-4">
+                  <h3 className="text-md font-bold text-gray-800">Ödeme Şekli</h3>
+                  <div className="group relative cursor-pointer">
+                    <HelpCircle size={18} className="text-gray-400 hover:text-fbiad-blue" />
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-72 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
+                      <strong>Nakit (Tek Çekim):</strong> Kart limitinden toplam tutar tek seferde düşer, bankaya taksit yapılmaz.<br/><br/>
+                      <strong>Banka Taksiti:</strong> Toplam tutar kart limitinden bloke edilir, bankanın izin verdiği maksimum taksit sayısına bölünür ve aydan aya ödersiniz.
+                    </div>
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                  <div 
+                    onClick={() => setPaymentMethod('cash')}
+                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'cash' ? 'border-fbiad-blue bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-fbiad-blue' : 'border-gray-300'}`}>
+                        {paymentMethod === 'cash' && <div className="w-2.5 h-2.5 rounded-full bg-fbiad-blue" />}
+                      </div>
+                      <span className="font-semibold text-gray-800">Nakit (Tek Çekim)</span>
+                    </div>
+                  </div>
+                  
+                  <div 
+                    onClick={() => setPaymentMethod('installment')}
+                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'installment' ? 'border-fbiad-blue bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'installment' ? 'border-fbiad-blue' : 'border-gray-300'}`}>
+                        {paymentMethod === 'installment' && <div className="w-2.5 h-2.5 rounded-full bg-fbiad-blue" />}
+                      </div>
+                      <span className="font-semibold text-gray-800">Banka Taksiti</span>
+                    </div>
+                  </div>
+                </div>
+
+                {paymentMethod === 'installment' && (
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    {isCheckingBin ? (
+                      <div className="p-4 text-sm text-gray-500 animate-pulse text-center">Banka bilgileri kontrol ediliyor...</div>
+                    ) : binError ? (
+                      <div className="p-4 text-sm text-red-600 bg-red-50 flex items-start gap-2">
+                        <AlertCircle size={18} className="shrink-0 mt-0.5" />
+                        <span>{binError}</span>
+                      </div>
+                    ) : detectedBankName && bankRule && bankRule.isSupported ? (
+                      (() => {
+                        const maxAllowed = detectedCategory === 'Ticari' ? bankRule.commercialMax : bankRule.individualMax;
+                        const finalCount = Math.min(payload.plan.length, maxAllowed);
+                        const isCapped = finalCount < payload.plan.length;
+                        const monthlyBase = Math.floor((payload.toplamTutar / finalCount) * 100) / 100;
+                        const remainder = payload.toplamTutar - (monthlyBase * (finalCount - 1));
+
+                        return (
+                          <div className="p-4 bg-green-50 border-b border-green-100">
+                            <div className="flex items-start gap-2 text-green-800 text-sm mb-2">
+                              <CheckCircle size={18} className="shrink-0 mt-0.5" />
+                              <div>
+                                <strong>{detectedBankName} ({detectedCategory})</strong> kartınız başarıyla algılandı.
+                                {isCapped && (
+                                  <div className="mt-1 text-amber-700 bg-amber-50 p-2 rounded-md border border-amber-200">
+                                    <AlertCircle size={16} className="inline mr-1 mb-0.5" />
+                                    Bankanız maksimum {maxAllowed} taksite izin vermektedir. Ödeme planınız {maxAllowed} taksit üzerinden yeniden hesaplanmıştır.
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <table className="w-full text-sm text-left mt-3 bg-white rounded border">
+                              <thead className="bg-gray-50 text-gray-700">
+                                <tr>
+                                  <th className="px-4 py-2 font-semibold border-b">Tarih / Ay</th>
+                                  <th className="px-4 py-2 font-semibold text-right border-b">Tutar</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {Array.from({ length: finalCount }).map((_, i) => {
+                                  const isLast = i === finalCount - 1;
+                                  const amt = isLast ? remainder : monthlyBase;
+                                  return (
+                                    <tr key={i} className="hover:bg-gray-50">
+                                      <td className="px-4 py-2 text-gray-600">
+                                        <span className="font-medium">{i + 1}. Taksit</span>
+                                      </td>
+                                      <td className="px-4 py-2 text-right font-bold text-fbiad-dark-blue">
+                                        {amt.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })()
+                    ) : cardNumber.replace(/\s/g, '').length >= 6 ? (
+                      <div className="p-4 text-sm text-amber-600 bg-amber-50">
+                        Bu kart için özel bir taksit kuralı bulunamadı veya banka algılanamadı. Standart taksit işlemi denenecektir.
+                      </div>
+                    ) : (
+                      <div className="p-6 text-sm text-gray-500 text-center">
+                        <CreditCard size={32} className="mx-auto mb-2 opacity-50" />
+                        Taksit seçeneklerini görmek için lütfen kart numaranızın ilk 6 hanesini giriniz.
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </section>

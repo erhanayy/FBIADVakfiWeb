@@ -5,7 +5,10 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         console.log("Incoming Moka payload:", JSON.stringify(body));
-        const { cardInfo, payload } = body;
+        const { cardInfo, payload, installmentCount } = body;
+
+        // Default to calculated count if not provided
+        const finalInstallmentCount = installmentCount || ((payload.taksitMi && payload.plan && payload.plan.length > 1) ? payload.plan.length : 1);
 
         // Use environment variables for Moka API credentials
         const dealerCode = process.env.MOKA_DEALER_CODE || "";
@@ -60,7 +63,7 @@ export async function POST(req: Request) {
                 CvcNumber: cardInfo.cvc,
                 Amount: Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
                 Currency: "TL",
-                InstallmentNumber: (payload.taksitMi && payload.plan && payload.plan.length > 1) ? payload.plan.length : 1,
+                InstallmentNumber: finalInstallmentCount,
                 ClientIP: req.headers.get("x-forwarded-for") || "127.0.0.1",
                 OtherTrxCode: trxCode,
                 IsPoolPayment: 0,
