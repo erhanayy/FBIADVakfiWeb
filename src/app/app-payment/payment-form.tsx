@@ -89,15 +89,20 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
 
           if (rule && !rule.isSupported && paymentMethod === 'installment') {
             setBinError(`Bankanız (${rule.bankName}) taksitli işlemleri desteklememektedir.`);
+          } else if (!rule && data.data.bankName) {
+            // Moka found it, but we couldn't map it to our table
+            setBinError(`Banka tanındı (${data.data.bankName} - ${data.data.groupName}) ancak tablomuzla eşleşmedi.`);
           }
         } else {
           setBankRule(null);
           setDetectedBankName(null);
+          setBinError(data.error || "BIN sorgusu başarısız oldu.");
         }
       })
       .catch(err => {
         setIsCheckingBin(false);
         console.error("BIN query failed", err);
+        setBinError("Sunucuya ulaşılamadı.");
       });
     } else {
       setBankRule(null);

@@ -44,6 +44,7 @@ export async function POST(req: Request) {
         });
 
         const data = await response.json();
+        console.log("Moka BIN API Response for", binNumber, ":", JSON.stringify(data));
 
         if (data.ResultCode === "Success" && data.Data) {
             return NextResponse.json({ 
