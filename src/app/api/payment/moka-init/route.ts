@@ -90,11 +90,22 @@ export async function POST(req: Request) {
         const data = await response.json();
 
         if (data.ResultCode === "Success" && data.Data && data.Data.Url) {
-            return NextResponse.json({ success: true, redirectUrl: data.Data.Url });
+            return NextResponse.json({ 
+                success: true, 
+                redirectUrl: data.Data.Url,
+                rawRequest: mokaRequest,
+                rawResponse: data
+            });
         } else {
             console.error("Moka Request Failed:", JSON.stringify(data, null, 2));
             const errorMsg = data.ResultMessage || data.ResultCode || data.Exception || "Moka ödeme isteği başarısız oldu.";
-            return NextResponse.json({ success: false, error: errorMsg, details: data }, { status: 400 });
+            return NextResponse.json({ 
+                success: false, 
+                error: errorMsg, 
+                details: data,
+                rawRequest: mokaRequest,
+                rawResponse: data
+            }, { status: 400 });
         }
 
     } catch (error: any) {

@@ -22,6 +22,9 @@ export default function BagisPage() {
   const [wantsMembershipInfo, setWantsMembershipInfo] = useState(false);
   const [isNotRobot, setIsNotRobot] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pauseRedirect, setPauseRedirect] = useState(true);
+  const [debugRequest, setDebugRequest] = useState<any>(null);
+  const [debugResponse, setDebugResponse] = useState<any>(null);
   
   // Contracts state
   const [contractsData, setContractsData] = useState<{ kvkk?: any, agreement?: any }>({});
@@ -256,9 +259,17 @@ export default function BagisPage() {
 
       const mokaData = await mokaRes.json();
 
+      setDebugRequest(mokaData.rawRequest || mokaPayload);
+      setDebugResponse(mokaData.rawResponse || mokaData);
+
       if (mokaData.success && mokaData.redirectUrl) {
-        // Redirect to Moka 3D Secure page
-        window.location.href = mokaData.redirectUrl;
+        if (!pauseRedirect) {
+          // Redirect to Moka 3D Secure page
+          window.location.href = mokaData.redirectUrl;
+        } else {
+          showAlert("Başarılı! Ancak 'Yönlendirmeyi Durdur' seçili olduğu için 3D ekranına gidilmedi. Aşağıdan logları inceleyebilirsiniz.", "success");
+          setIsSubmitting(false);
+        }
       } else {
         showAlert(mokaData.error || "Ödeme işlemi başlatılamadı. Lütfen kart bilgilerinizi kontrol ediniz.", "error");
         setIsSubmitting(false);
@@ -556,6 +567,20 @@ export default function BagisPage() {
                   </div>
                 </div>
 
+                {/* Yönlendirme Durdurma (Debug) */}
+                <div className="flex items-center gap-3 bg-red-50 p-4 rounded-lg border border-red-100">
+                  <input 
+                    type="checkbox" 
+                    id="pauseRedirect" 
+                    checked={pauseRedirect}
+                    onChange={(e) => setPauseRedirect(e.target.checked)}
+                    className="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500 cursor-pointer" 
+                  />
+                  <label htmlFor="pauseRedirect" className="text-sm font-semibold text-red-800 cursor-pointer">
+                    Moka 3D Secure Yönlendirmesini Durdur (Logları Görmek İçin)
+                  </label>
+                </div>
+
               </section>
 
               {/* Submit Button */}
@@ -567,6 +592,27 @@ export default function BagisPage() {
                 <Lock size={24} />
                 {isSubmitting ? 'İşleminiz Yapılıyor...' : 'Güvenli Bağış Yap'}
               </button>
+
+              {/* Debug UI */}
+              {(debugRequest || debugResponse) && (
+                <div className="mt-8 bg-gray-900 text-green-400 p-6 rounded-xl font-mono text-xs overflow-auto">
+                  <h3 className="text-white text-lg mb-4 font-bold">📡 API Logs (Debug)</h3>
+                  
+                  <div className="mb-6">
+                    <h4 className="text-yellow-400 mb-2 font-bold">📤 MOKA REQUEST PAYLOAD</h4>
+                    <pre className="bg-black/50 p-4 rounded border border-gray-700 whitespace-pre-wrap">
+                      {JSON.stringify(debugRequest, null, 2)}
+                    </pre>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-cyan-400 mb-2 font-bold">📥 MOKA RESPONSE</h4>
+                    <pre className="bg-black/50 p-4 rounded border border-gray-700 whitespace-pre-wrap">
+                      {JSON.stringify(debugResponse, null, 2)}
+                    </pre>
+                  </div>
+                </div>
+              )}
 
             </form>
           </div>
