@@ -36,7 +36,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
   });
 
   // New states for BIN detection and Payment Options
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'installment'>(payload.taksitMi ? 'installment' : 'cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'installment' | 'subscription'>(payload.taksitMi ? 'installment' : 'cash');
   const [bankRule, setBankRule] = useState<BankInstallmentRule | null>(null);
   const [isCheckingBin, setIsCheckingBin] = useState(false);
   const [binError, setBinError] = useState<string | null>(null);
@@ -173,14 +173,14 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
         }
 
         if (paymentMethod === 'installment' && bankRule && !bankRule.isSupported) {
-          showAlert(`Bankanız (${bankRule.bankName}) taksitli işlemleri desteklememektedir. Lütfen Tek Çekim (Peşin) ödemeyi seçiniz.`, "warning");
+          showAlert(`Bankanız (${bankRule.bankName}) taksitli işlemleri desteklememektedir. Lütfen Tek Çekim (Peşin) veya Aylık Otomatik Çekim ödemeyi seçiniz.`, "warning");
           setIsSubmitting(false);
           return;
         }
 
         const maxBankInstallments = bankRule ? (detectedCategory === 'Ticari' ? bankRule.commercialMax : bankRule.individualMax) : 1;
         const requestedInstallments = payload.plan.length > 0 ? payload.plan.length : 1;
-        const finalInstallmentCount = paymentMethod === 'installment' ? Math.min(requestedInstallments, maxBankInstallments) : 1;
+        const finalInstallmentCount = paymentMethod === 'installment' ? Math.min(requestedInstallments, maxBankInstallments) : (paymentMethod === 'subscription' ? 1 : 1);
 
         const [expMonth, expYearPrefix] = expDate.split('/');
         const expYear = "20" + expYearPrefix; // Converts "25" to "2025"
@@ -197,6 +197,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               cvc
             },
             payload,
+            paymentMethod,
             installmentCount: finalInstallmentCount
           })
         });
@@ -278,7 +279,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                 <div className="text-3xl font-bold text-blue-900">{payload.tekilTutar.toLocaleString('tr-TR')} ₺</div>
               </div>
               
-              {payload.taksitMi && payload.toplamTutar > payload.tekilTutar && (
+              {paymentMethod === 'installment' && payload.taksitMi && payload.toplamTutar > payload.tekilTutar && (
                 <div className="bg-amber-50 p-6 rounded-xl border border-amber-100">
                   <div className="text-sm font-semibold text-amber-800 mb-1">Karttan Çekilecek Tutar</div>
                   <div className="text-3xl font-bold text-amber-900">{payload.toplamTutar.toLocaleString('tr-TR')} ₺</div>
@@ -293,37 +294,25 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                   <h3 className="text-md font-bold text-gray-800">Ödeme Şekli</h3>
                   <div className="group relative cursor-pointer">
                     <HelpCircle size={18} className="text-gray-400 hover:text-fbiad-blue" />
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-72 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
-                      <strong>Nakit (Tek Çekim):</strong> Kart limitinden toplam tutar tek seferde düşer, bankaya taksit yapılmaz.<br/><br/>
-                      <strong>Banka Taksiti:</strong> Toplam tutar kart limitinden bloke edilir, bankanın izin verdiği maksimum taksit sayısına bölünür ve aydan aya ödersiniz.
+                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-80 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
+                      <strong>1. Nakit (Tek Çekim):</strong> Kart limitinden toplam tutar tek seferde düşer, bankaya taksit yapılmaz.<br/><br/>
+                      <strong>2. Banka Taksiti:</strong> Toplam tutar kart limitinden bloke edilir, bankanın izin verdiği taksit sayısına bölünür.<br/><br/>
+                      <strong>3. Aylık Otomatik Çekim (Abonelik):</strong> Kart limitinize bloke konulmaz. Sadece ilk ayın tutarı çekilir. Kalan aylar için kartınız saklanarak günü geldiğinde otomatik çekim yapılır.
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                  <div 
-                    onClick={() => setPaymentMethod('cash')}
-                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'cash' ? 'border-fbiad-blue bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}
+                <div className="mb-6">
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value as any)}
+                    className="w-full border-2 border-gray-300 focus:border-fbiad-blue outline-none rounded-xl p-4 text-gray-800 font-semibold appearance-none bg-white cursor-pointer hover:border-blue-200 transition-all"
+                    style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A365D%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
                   >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-fbiad-blue' : 'border-gray-300'}`}>
-                        {paymentMethod === 'cash' && <div className="w-2.5 h-2.5 rounded-full bg-fbiad-blue" />}
-                      </div>
-                      <span className="font-semibold text-gray-800">Nakit (Tek Çekim)</span>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    onClick={() => setPaymentMethod('installment')}
-                    className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${paymentMethod === 'installment' ? 'border-fbiad-blue bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'installment' ? 'border-fbiad-blue' : 'border-gray-300'}`}>
-                        {paymentMethod === 'installment' && <div className="w-2.5 h-2.5 rounded-full bg-fbiad-blue" />}
-                      </div>
-                      <span className="font-semibold text-gray-800">Banka Taksiti</span>
-                    </div>
-                  </div>
+                    <option value="cash">1. Nakit (Tek Çekim)</option>
+                    <option value="installment">2. Banka Taksiti</option>
+                    <option value="subscription">3. Aylık Otomatik Çekim (Abonelik)</option>
+                  </select>
                 </div>
 
                 {paymentMethod === 'installment' && (
@@ -394,6 +383,39 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                         Taksit seçeneklerini görmek için lütfen kart numaranızın ilk 6 hanesini giriniz.
                       </div>
                     )}
+                  </div>
+                )}
+
+                {paymentMethod === 'subscription' && (
+                  <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mt-4">
+                    <div className="p-4 text-sm text-fbiad-dark-blue bg-blue-50 mb-3 border-b border-blue-100 flex items-start gap-2">
+                      <ShieldCheck size={18} className="shrink-0 mt-0.5" />
+                      <span>İlk ay taksidi şimdi çekilecek, kalan taksitler ise aylık olarak kartınızdan otomatik tahsil edilecektir. Kart limitinize toplam tutar bloke edilmez.</span>
+                    </div>
+                    <table className="w-full text-sm text-left bg-white">
+                      <thead className="bg-gray-50 text-gray-700">
+                        <tr>
+                          <th className="px-4 py-3 font-semibold border-b">Tarih</th>
+                          <th className="px-4 py-3 font-semibold text-right border-b">Tutar</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {payload.plan.map((item, index) => {
+                          const dateObj = new Date(item.date);
+                          const dateStr = dateObj.toLocaleDateString('tr-TR', { year: 'numeric', month: 'long' });
+                          return (
+                            <tr key={item.id} className="hover:bg-gray-50">
+                              <td suppressHydrationWarning className="px-4 py-3 text-gray-600">
+                                <span className="font-medium">{index + 1}. Taksit</span> - {dateStr}
+                              </td>
+                              <td className="px-4 py-3 text-right font-bold text-fbiad-dark-blue">
+                                {item.amount.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ₺
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
                   </div>
                 )}
               </div>
@@ -527,7 +549,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
             className={`w-full bg-fbiad-dark-blue hover:bg-fbiad-blue text-white font-bold text-xl py-5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             <Lock size={24} />
-            {isSubmitting ? 'İşleminiz Yapılıyor...' : `Ödemeyi Tamamla (${(payload.taksitMi && payload.toplamTutar > payload.tekilTutar ? payload.toplamTutar : payload.tekilTutar).toLocaleString('tr-TR')} ₺)`}
+            {isSubmitting ? 'İşleminiz Yapılıyor...' : `Ödemeyi Tamamla (${(paymentMethod === 'installment' && payload.taksitMi && payload.toplamTutar > payload.tekilTutar ? payload.toplamTutar : payload.tekilTutar).toLocaleString('tr-TR')} ₺)`}
           </button>
 
         </form>
