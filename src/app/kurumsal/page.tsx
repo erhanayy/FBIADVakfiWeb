@@ -1,4 +1,5 @@
 import { kurumsalData } from "@/data/kurumsal";
+import Image from "next/image";
 
 export const metadata = {
   title: "Kurumsal | FBİAD Vakfı",
@@ -119,41 +120,41 @@ export default function KurumsalPage() {
           </div>
         </section>
 
-        {/* Kurucularımız */}
-        <section id="kurucularimiz" className="scroll-mt-32">
+        {/* Kurucularımız ve Yönetim Kurulu */}
+        <section id="kurucularimiz-ve-yonetim" className="scroll-mt-32">
           <div className="flex items-center gap-4 mb-8">
             <div className="w-12 h-1 bg-fbiad-yellow rounded-full"></div>
-            <h2 className="text-3xl font-bold text-fbiad-dark-blue">Kurucularımız</h2>
+            <h2 className="text-3xl font-bold text-fbiad-dark-blue">Kurucularımız ve Yönetim Kurulu</h2>
           </div>
-          <div className="prose prose-lg text-gray-600 max-w-none">
-            <p>
-              Vakfımız, eğitime gönül vermiş değerli kurucularımızın öncülüğünde hayata geçirilmiştir. 
-              (Buraya kurucuların kısa hikayesi veya listesi eklenecektir.)
-            </p>
-            <ul className="list-disc pl-6 mt-4 space-y-2">
-              <li>Kurucu İsim 1</li>
-              <li>Kurucu İsim 2</li>
-              <li>Kurucu İsim 3</li>
-            </ul>
-          </div>
-        </section>
-
-        {/* Yönetim Kurulu */}
-        <section id="yonetim-kurulu" className="scroll-mt-32">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="w-12 h-1 bg-fbiad-yellow rounded-full"></div>
-            <h2 className="text-3xl font-bold text-fbiad-dark-blue">Yönetim Kurulu</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((person) => (
-              <div key={person} className="text-center">
-                <div className="w-32 h-32 mx-auto bg-gray-200 rounded-full mb-4 object-cover overflow-hidden">
-                  <div className="w-full h-full bg-gray-300 flex items-center justify-center text-gray-500">Fotoğraf</div>
-                </div>
-                <h4 className="text-lg font-bold text-fbiad-dark-blue">Yönetici Adı {person}</h4>
-                <p className="text-sm text-fbiad-yellow font-medium">Yönetim Kurulu Üyesi</p>
+          
+          <div className="grid md:grid-cols-2 gap-12">
+            {/* Sol Kolon - Başkan */}
+            <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
+              <h3 className="text-2xl font-semibold text-fbiad-blue mb-6">Kurucu & Mütevelli Heyeti Başkanı</h3>
+              <div className="relative w-64 h-80 mb-6 rounded-xl overflow-hidden shadow-md">
+                <Image 
+                  src="/guven-gulesce.jpg" 
+                  alt="Güven Güleşce" 
+                  fill 
+                  className="object-cover"
+                />
               </div>
-            ))}
+              <h4 className="text-xl font-bold text-fbiad-dark-blue">Güven Güleşce</h4>
+              <p className="text-gray-600 font-medium mt-1">Fenerbahçeli İş Adamları Vakfı</p>
+            </div>
+
+            {/* Sağ Kolon - Yönetim Kurulu */}
+            <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm">
+              <h3 className="text-2xl font-semibold text-fbiad-blue mb-6">Yönetim Kurulu Üyelerimiz</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {kurumsalData.yonetimKuruluUyeleri.map((uye, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-white border border-gray-100 rounded-lg shadow-sm">
+                    <div className="w-2 h-2 rounded-full bg-fbiad-yellow"></div>
+                    <span className="font-semibold text-gray-700">{uye}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </section>
 

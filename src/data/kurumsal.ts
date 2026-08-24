@@ -63,5 +63,18 @@ export const kurumsalData = {
       baslik: "Geleceğe Öncülük",
       aciklama: "Gençlerimizin sadece bugünün öğrencileri değil, yarının vizyoner liderleri ve değer üreten bireyleri olması için ilham veririz."
     }
+  ],
+  yonetimKuruluUyeleri: [
+    "Adem Akpınar",
+    "Selami Çakır",
+    "Enis İris",
+    "Salih Güleşce",
+    "Volkan Öztürk",
+    "Erhan Alveroğlu",
+    "Erhan Keman",
+    "Mustafa Beyazıt",
+    "Melih Şahin",
+    "Hüdayi Torun",
+    "Fatih Bağcı"
   ]
 };
