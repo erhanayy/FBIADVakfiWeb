@@ -171,7 +171,6 @@ export default function KurumsalPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-2">
               {kurumsalData.yonetimEkibi.map((kisi, idx) => (
                 <div key={idx} className="p-6 bg-white shadow-sm border border-gray-100 rounded-xl flex flex-col items-center text-center hover:shadow-md transition-shadow">
-                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wider mb-2">Ekip Üyesi</span>
                   <h4 className="font-bold text-fbiad-dark-blue text-lg">{kisi.isim}</h4>
                   <p className="text-sm text-fbiad-yellow font-medium mt-1">{kisi.unvan}</p>
                 </div>
