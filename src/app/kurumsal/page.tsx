@@ -94,6 +94,31 @@ export default function KurumsalPage() {
           </div>
         </section>
 
+        {/* Mütevelli Heyeti Başkanımızdan */}
+        <section id="mutevelli-heyeti" className="scroll-mt-32">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-1 bg-fbiad-yellow rounded-full"></div>
+            <h2 className="text-3xl font-bold text-fbiad-dark-blue">Mütevelli Heyeti Başkanımızdan</h2>
+          </div>
+          <div className="bg-gray-50 p-8 md:p-12 rounded-2xl border border-gray-100 shadow-sm relative">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <svg width="120" height="120" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.017 21L16.41 14.583C16.89 13.25 17.51 12.167 18.27 11.333C19.03 10.5 19.89 10.083 20.85 10.083V5.5C18.85 5.5 17.15 6.271 15.75 7.812C14.35 9.354 13.65 11.458 13.65 14.125V21H14.017ZM4.917 21L7.31 14.583C7.79 13.25 8.41 12.167 9.17 11.333C9.93 10.5 10.79 10.083 11.75 10.083V5.5C9.75 5.5 8.05 6.271 6.65 7.812C5.25 9.354 4.55 11.458 4.55 14.125V21H4.917Z"/>
+              </svg>
+            </div>
+            <div className="prose prose-lg text-gray-600 max-w-none font-medium leading-relaxed space-y-4 relative z-10">
+              {kurumsalData.mutevelliHeyeti.map((paragraph, idx) => (
+                <p key={idx}>{paragraph}</p>
+              ))}
+              <div className="pt-6 mt-8 border-t border-gray-200">
+                <h4 className="font-bold text-fbiad-dark-blue text-xl">Güven Güleşce</h4>
+                <p className="text-fbiad-yellow font-medium">Kurucu & Mütevelli Heyeti Başkanı</p>
+                <p className="text-gray-500 text-sm">Fenerbahçeli İş Adamları Vakfı</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Kurucularımız */}
         <section id="kurucularimiz" className="scroll-mt-32">
           <div className="flex items-center gap-4 mb-8">

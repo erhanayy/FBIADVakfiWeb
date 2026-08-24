@@ -20,6 +20,8 @@ export default function Footer() {
               <li><Link href="/kurumsal#hakkimizda" className="hover:text-white transition-colors">Hakkımızda</Link></li>
               <li><Link href="/kurumsal#misyon" className="hover:text-white transition-colors">Misyon ve Vizyon</Link></li>
               <li><Link href="/kurumsal#degerlerimiz" className="hover:text-white transition-colors">Değerlerimiz</Link></li>
+              <li><Link href="/kurumsal#tarihcemiz" className="hover:text-white transition-colors">Tarihçemiz</Link></li>
+              <li><Link href="/kurumsal#mutevelli-heyeti" className="hover:text-white transition-colors">Mütevelli Heyeti Başkanımızdan</Link></li>
               <li><Link href="/kurumsal#yonetim-kurulu" className="hover:text-white transition-colors">Yönetim Kurulu</Link></li>
               <li><Link href="/kurumsal#faaliyet-raporlari" className="hover:text-white transition-colors">Faaliyet Raporları</Link></li>
             </ul>

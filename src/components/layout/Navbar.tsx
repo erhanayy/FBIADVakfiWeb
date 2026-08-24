@@ -66,6 +66,8 @@ export default function Navbar() {
                       <Link href="/kurumsal#hakkimizda" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Hakkımızda</Link>
                       <Link href="/kurumsal#misyon" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Misyon & Vizyon</Link>
                       <Link href="/kurumsal#degerlerimiz" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Değerlerimiz</Link>
+                      <Link href="/kurumsal#tarihcemiz" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Tarihçemiz</Link>
+                      <Link href="/kurumsal#mutevelli-heyeti" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Mütevelli Heyeti Başkanımızdan</Link>
                       <Link href="/kurumsal#kurucularimiz" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Kurucularımız</Link>
                       <Link href="/kurumsal#yonetim-kurulu" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Yönetim Kurulu</Link>
                       <Link href="/kurumsal#yonetim-ekibi" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors">Yönetim Ekibi</Link>
