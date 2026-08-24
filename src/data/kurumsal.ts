@@ -1,7 +1,22 @@
 export const kurumsalData = {
-  hakkimizda: "FBİAD Vakfı, Fenerbahçeli İş Adamları Derneği’nin sahip olduğu köklü dayanışma kültürünü ve toplumsal sorumluluk bilincini geleceğe taşımak üzere kurulmuştur. Temel amacımız; ülkemizin yarınlarını inşa edecek olan gençlerimizin eğitim hayatlarına umut olmak, maddi imkansızlıkların yeteneklerin önüne geçmesini engellemek ve adil bir eğitim zeminine katkı sunmaktır. Değerli gönüllülerimizin ve bağışçılarımızın katkılarıyla büyüyen vakfımız, eğitim desteklerinin yanı sıra toplumsal yardımlaşma projeleriyle de ihtiyaç duyulan her alanda iyiliği ve toplumsal faydayı çoğaltmak için kararlılıkla çalışmaktadır.",
-  misyonumuz: "Eğitim hayatında desteğe ihtiyaç duyan gençlerin, yeteneklerini ve potansiyellerini özgüvenle açığa çıkarabilmeleri için şeffaf, güvenilir ve sürdürülebilir kaynaklar oluşturarak kalıcı katkı sağlamak.",
-  vizyonumuz: "Gönüllü ağımızın gücüyle eğitimde fırsat eşitliğini büyüten, toplumsal dayanışma kültürünü kökleştiren ve yetiştirdiği nesillerle geleceğe değer katan, öncü ve örnek bir sivil toplum kuruluşu olmak.",
+  hakkimizda: [
+    "Fenerbahçeli İş Adamları Vakfı, Fenerbahçe değerlerinden aldığı birlik, dayanışma ve sorumluluk anlayışını toplumsal faydaya dönüştürmek amacıyla kurulmuştur.",
+    "Vakfımız; eğitime destek olmayı, ihtiyaç sahiplerinin yanında yer almayı, sosyal sorumluluk projeleri geliştirmeyi ve toplumun farklı kesimlerine kalıcı değer sağlayacak çalışmalar gerçekleştirmeyi temel görevleri arasında görmektedir.",
+    "Özellikle üniversite öğrencilerinin eğitim hayatlarına katkı sağlamak, başarılı ve desteğe ihtiyaç duyan gençlerin geleceğe daha güçlü hazırlanmasına yardımcı olmak vakfımızın öncelikli çalışma alanlarından biridir. Burs programlarımızla yalnızca maddi destek sağlamayı değil; gençlerimizin eğitimlerini, kişisel gelişimlerini ve geleceğe dair hedeflerini destekleyen güçlü bir dayanışma ağı oluşturmayı amaçlıyoruz.",
+    "Fenerbahçeli iş insanlarının bilgi, tecrübe ve imkânlarını toplumsal fayda etrafında bir araya getirerek; eğitimden sosyal dayanışmaya, gençlerden ihtiyaç sahiplerine kadar uzanan geniş bir alanda sürdürülebilir projeler üretmek için çalışıyoruz.",
+    "Çünkü biz, gerçek başarının yalnızca üretmek ve büyümekle değil, üretilen değeri toplumla paylaşmakla anlam kazandığına inanıyoruz."
+  ],
+  misyonumuz: [
+    "Misyonumuz; eğitimde fırsat eşitliğine katkı sağlamak, gençlerin geleceğe daha güçlü hazırlanmasına destek olmak, ihtiyaç sahiplerine ulaşmak ve toplumun farklı alanlarında kalıcı fayda sağlayacak sosyal sorumluluk projeleri hayata geçirmektir.",
+    "Başta üniversite öğrencileri olmak üzere gençlerimizin eğitim yolculuklarına burslarla destek olurken; onların yalnızca bugünkü ihtiyaçlarına değil, gelecekte topluma değer üreten bireyler olarak yetişmelerine de katkı sağlamayı hedefliyoruz.",
+    "Dayanışmayı büyüten, insan hayatına dokunan, ölçülebilir ve sürdürülebilir projeler geliştirerek Fenerbahçe camiasının güçlü birlik kültürünü toplumsal faydaya dönüştürmek için çalışıyoruz."
+  ],
+  vizyonumuz: [
+    "Vizyonumuz; eğitim, sosyal dayanışma ve toplumsal sorumluluk alanlarında geliştirdiği nitelikli ve sürdürülebilir projelerle örnek gösterilen, güvenilir ve güçlü bir vakıf olmaktır.",
+    "Fenerbahçeli iş insanlarının ortak gücünü ve dayanışma kültürünü toplumun geleceğine yatırım yapan bir yapıya dönüştürerek; daha fazla öğrenciye, daha fazla gence ve daha fazla ihtiyaç sahibine ulaşmayı hedefliyoruz.",
+    "Uzun vadede yalnızca burs veren veya dönemsel sosyal yardımlar gerçekleştiren bir yapı değil; gençlerin eğitimine, gelişimine ve geleceğine eşlik eden, toplumsal sorunlara kalıcı çözümler üretmeye çalışan ve oluşturduğu sosyal etkiyi her geçen yıl büyüten bir vakıf olmayı amaçlıyoruz.",
+    "Birlikten doğan gücü, toplumsal faydaya dönüştürmek için çalışıyoruz."
+  ],
   degerlerimiz: [
     {
       baslik: "Dayanışma",

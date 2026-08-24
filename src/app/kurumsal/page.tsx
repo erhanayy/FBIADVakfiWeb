@@ -26,7 +26,11 @@ export default function KurumsalPage() {
             <h2 className="text-3xl font-bold text-fbiad-dark-blue">Hakkımızda</h2>
           </div>
           <div className="prose prose-lg text-gray-600 max-w-none font-medium leading-relaxed">
-            <p>{kurumsalData.hakkimizda}</p>
+            <div className="space-y-4">
+              {kurumsalData.hakkimizda.map((paragraph, idx) => (
+                <p key={idx}>{paragraph}</p>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -39,15 +43,19 @@ export default function KurumsalPage() {
           <div className="grid md:grid-cols-2 gap-12">
             <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h3 className="text-2xl font-semibold text-fbiad-blue mb-4">Misyonumuz</h3>
-              <p className="text-gray-600 leading-relaxed font-medium">
-                {kurumsalData.misyonumuz}
-              </p>
+              <div className="text-gray-600 leading-relaxed font-medium space-y-4">
+                {kurumsalData.misyonumuz.map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+              </div>
             </div>
             <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm">
               <h3 className="text-2xl font-semibold text-fbiad-blue mb-4">Vizyonumuz</h3>
-              <p className="text-gray-600 leading-relaxed font-medium">
-                {kurumsalData.vizyonumuz}
-              </p>
+              <div className="text-gray-600 leading-relaxed font-medium space-y-4">
+                {kurumsalData.vizyonumuz.map((paragraph, idx) => (
+                  <p key={idx}>{paragraph}</p>
+                ))}
+              </div>
             </div>
           </div>
         </section>
