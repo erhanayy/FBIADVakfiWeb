@@ -79,6 +79,21 @@ export default function KurumsalPage() {
           </div>
         </section>
 
+        {/* Tarihçemiz */}
+        <section id="tarihcemiz" className="scroll-mt-32">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="w-12 h-1 bg-fbiad-yellow rounded-full"></div>
+            <h2 className="text-3xl font-bold text-fbiad-dark-blue">Tarihçemiz</h2>
+          </div>
+          <div className="prose prose-lg text-gray-600 max-w-none font-medium leading-relaxed">
+            <div className="space-y-4">
+              {kurumsalData.tarihcemiz.map((paragraph, idx) => (
+                <p key={idx}>{paragraph}</p>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* Kurucularımız */}
         <section id="kurucularimiz" className="scroll-mt-32">
           <div className="flex items-center gap-4 mb-8">

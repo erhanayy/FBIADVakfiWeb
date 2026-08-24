@@ -17,6 +17,13 @@ export const kurumsalData = {
     "Uzun vadede yalnızca burs veren veya dönemsel sosyal yardımlar gerçekleştiren bir yapı değil; gençlerin eğitimine, gelişimine ve geleceğine eşlik eden, toplumsal sorunlara kalıcı çözümler üretmeye çalışan ve oluşturduğu sosyal etkiyi her geçen yıl büyüten bir vakıf olmayı amaçlıyoruz.",
     "Birlikten doğan gücü, toplumsal faydaya dönüştürmek için çalışıyoruz."
   ],
+  tarihcemiz: [
+    "Fenerbahçeli İş Adamları Vakfı, Fenerbahçe camiasının köklü değerlerinden biri olan birlik, dayanışma ve topluma karşı sorumluluk anlayışını kalıcı bir yapıya dönüştürmek amacıyla 2017 yılında kurulmuştur.",
+    "Kuruluşundan itibaren vakfımızın temel düşüncesi; Fenerbahçeli iş insanlarının sahip olduğu bilgi, birikim, tecrübe ve imkânları yalnızca kendi çevresi için değil, toplum yararına değer üreten çalışmalar için de bir araya getirmek olmuştur.",
+    "Bu anlayış doğrultusunda eğitim ve gençler vakfımızın en önemli çalışma alanlarından biri olarak belirlenmiş; özellikle üniversite öğrencilerinin eğitim hayatlarına burslarla destek olmak, ihtiyaç sahiplerine ulaşmak ve toplumsal fayda sağlayacak sosyal sorumluluk projeleri geliştirmek öncelikli hedeflerimiz arasında yer almıştır.",
+    "2017 yılında atılan bu adım, yıllar içerisinde daha fazla insana dokunmayı ve daha sürdürülebilir projeler üretmeyi amaçlayan güçlü bir dayanışma anlayışına dönüşmüştür.",
+    "Bugün Fenerbahçeli İş Adamları Vakfı olarak; geçmişimizden aldığımız değerleri geleceğe taşıyor, eğitime ve gençlere yapılan her katkının ülkemizin geleceğine yapılan bir yatırım olduğuna inanıyor ve “birlikte güçlüyüz” anlayışıyla topluma kalıcı değer bırakmak için çalışmalarımızı sürdürüyoruz."
+  ],
   degerlerimiz: [
     {
       baslik: "Dayanışma",
