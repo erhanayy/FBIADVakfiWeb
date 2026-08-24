@@ -130,7 +130,7 @@ export default function KurumsalPage() {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Sol Kolon - Başkan */}
             <div className="bg-gray-50 p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center">
-              <h3 className="text-2xl font-semibold text-fbiad-blue mb-6">Kurucu & Mütevelli Heyeti Başkanı</h3>
+              <h3 className="text-lg lg:text-xl font-semibold text-fbiad-blue mb-6 whitespace-nowrap">Kurucu & Mütevelli Heyeti Başkanımız</h3>
               <div className="relative w-64 h-80 mb-6 rounded-xl overflow-hidden shadow-md">
                 <Image 
                   src="/guven-gulesce.jpg" 
