@@ -76,5 +76,10 @@ export const kurumsalData = {
     "Melih Şahin",
     "Hüdayi Torun",
     "Fatih Bağcı"
+  ],
+  yonetimEkibi: [
+    { isim: "Erhan Ayyıldız", unvan: "İcra Kurulu Üyesi" },
+    { isim: "Berna Yılmaz", unvan: "İcra Kurulu Üyesi" },
+    { isim: "Damla Birbudak", unvan: "İcra Kurulu Üyesi" }
   ]
 };
