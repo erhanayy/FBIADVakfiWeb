@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ShieldCheck, Lock, CreditCard, User, Calendar, HelpCircle, CheckCircle, AlertCircle } from "lucide-react";
+import { ShieldCheck, Lock, CreditCard, User, Calendar, HelpCircle, CheckCircle, AlertCircle, Upload, FileText } from "lucide-react";
 import { AlertModal } from "@/components/ui/AlertModal";
 import { BankInstallmentRule, getBankRule } from "@/lib/bank-installments";
 
@@ -36,12 +36,14 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
   });
 
   // New states for BIN detection and Payment Options
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'installment' | 'subscription'>(payload.taksitMi ? 'installment' : 'cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'installment' | 'subscription' | 'wire_transfer'>(payload.taksitMi ? 'subscription' : 'wire_transfer');
   const [bankRule, setBankRule] = useState<BankInstallmentRule | null>(null);
   const [isCheckingBin, setIsCheckingBin] = useState(false);
   const [binError, setBinError] = useState<string | null>(null);
   const [detectedBankName, setDetectedBankName] = useState<string | null>(null);
   const [detectedCategory, setDetectedCategory] = useState<string | null>(null);
+  const [receiptFile, setReceiptFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', onSuccess?: () => void) => {
     setAlertConfig({ isOpen: true, message, type, onSuccess });
@@ -137,6 +139,56 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
     setIsSubmitting(true);
     
     try {
+      if (paymentMethod === 'wire_transfer') {
+        if (!receiptFile) {
+          showAlert("Lütfen havale/EFT işleminize ait dekontu yükleyiniz.", "warning");
+          setIsSubmitting(false);
+          return;
+        }
+
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", receiptFile);
+
+        // We assume we will create a proxy route /api/upload in FBIADVakfiWeb
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        setIsUploading(false);
+
+        if (!uploadRes.ok) {
+          showAlert("Dekont yüklenirken bir hata oluştu. Lütfen tekrar deneyiniz.", "error");
+          setIsSubmitting(false);
+          return;
+        }
+
+        const uploadData = await uploadRes.json();
+        const receiptUrl = uploadData.url;
+
+        const response = await fetch('/api/app-payment/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fundId: payload.fundId,
+            transactionId: "WIRE-" + Date.now(),
+            paymentIds: payload.plan.map(p => p.id),
+            paymentMethod: 'wire_transfer',
+            receiptUrl
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setIsSuccess(true);
+        } else {
+          showAlert("Ödeme sisteme kaydedilirken hata oluştu.", "error");
+        }
+        setIsSubmitting(false);
+        return;
+      }
+
       const cleanCard = cardNumber.replace(/\s/g, '');
       
       if (cleanCard === '1111111111111111') {
@@ -295,9 +347,17 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                   <div className="group relative cursor-pointer">
                     <HelpCircle size={18} className="text-gray-400 hover:text-fbiad-blue" />
                     <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-80 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg z-10">
-                      <strong>1. Nakit (Tek Çekim):</strong> Kart limitinden toplam tutar tek seferde düşer, bankaya taksit yapılmaz.<br/><br/>
-                      <strong>2. Banka Taksiti:</strong> Toplam tutar kart limitinden bloke edilir, bankanın izin verdiği taksit sayısına bölünür.<br/><br/>
-                      <strong>3. Aylık Otomatik Çekim (Abonelik):</strong> Kart limitinize bloke konulmaz. Sadece ilk ayın tutarı çekilir. Kalan aylar için kartınız saklanarak günü geldiğinde otomatik çekim yapılır.
+                      {!payload.taksitMi ? (
+                        <>
+                          <strong>Havale / EFT:</strong> Banka hesabımıza havale ile gönderim yapabilirsiniz.<br/><br/>
+                          <strong>Nakit (Tek Çekim):</strong> Kart limitinden toplam tutar tek seferde düşer, bankaya taksit yapılmaz.
+                        </>
+                      ) : (
+                        <>
+                          <strong>Banka Taksiti:</strong> Toplam tutar kart limitinden bloke edilir, bankanın izin verdiği taksit sayısına bölünür.<br/><br/>
+                          <strong>Aylık Otomatik Çekim (Abonelik):</strong> Kart limitinize bloke konulmaz. Sadece ilk ayın tutarı çekilir. Kalan aylar için kartınız saklanarak günü geldiğinde otomatik çekim yapılır.
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -309,9 +369,17 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
                     className="w-full border-2 border-gray-300 focus:border-fbiad-blue outline-none rounded-xl p-4 text-gray-800 font-semibold appearance-none bg-white cursor-pointer hover:border-blue-200 transition-all"
                     style={{ backgroundImage: 'url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%231A365D%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem top 50%', backgroundSize: '0.65rem auto' }}
                   >
-                    <option value="cash">1. Nakit (Tek Çekim)</option>
-                    <option value="installment">2. Banka Taksiti</option>
-                    <option value="subscription">3. Aylık Otomatik Çekim (Abonelik)</option>
+                    {!payload.taksitMi ? (
+                      <>
+                        <option value="wire_transfer">Havale / EFT</option>
+                        <option value="cash">Kredi Kartı Peşin (Tek Çekim)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="subscription">Kredi Kartı ile Aylık Çekim (Abonelik)</option>
+                        <option value="installment">Kredi Kartı ile Banka Taksiti</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -424,7 +492,60 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
 
           <hr className="border-gray-100" />
 
-          <section>
+          {paymentMethod === 'wire_transfer' ? (
+            <section>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-fbiad-dark-blue flex items-center gap-2">
+                  <span className="bg-fbiad-yellow text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span> 
+                  Havale / EFT Bilgileri
+                </h2>
+              </div>
+              <div className="bg-blue-50 p-6 rounded-2xl border border-blue-200 space-y-6">
+                <div className="text-blue-900 bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                  <p className="text-sm font-semibold mb-1 text-gray-500">Alıcı Adı:</p>
+                  <p className="text-lg font-bold mb-4">FENERBAHÇELİ İŞ ADAMLARI VAKFI</p>
+                  
+                  <p className="text-sm font-semibold mb-1 text-gray-500">Banka & IBAN:</p>
+                  <p className="text-xl font-bold tracking-wider font-mono bg-blue-50 p-2 rounded-lg text-center">TR00 0000 0000 0000 0000 0000 00</p>
+                  <p className="text-xs text-gray-500 mt-2 text-center">Ödemenizi gönderdikten sonra lütfen işlem dekontunu aşağıdan yükleyiniz.</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-gray-700">İşlem Dekontu Yükle</label>
+                  <div className="relative">
+                    <input 
+                      type="file"
+                      id="receiptUpload"
+                      className="hidden"
+                      accept="image/*,.pdf"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setReceiptFile(e.target.files[0]);
+                        }
+                      }}
+                    />
+                    <label 
+                      htmlFor="receiptUpload"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-xl border-2 border-dashed border-blue-300 bg-white text-blue-700 cursor-pointer hover:bg-blue-50 hover:border-blue-400 transition-all font-semibold"
+                    >
+                      {receiptFile ? (
+                        <>
+                          <FileText size={20} />
+                          {receiptFile.name}
+                        </>
+                      ) : (
+                        <>
+                          <Upload size={20} />
+                          Dekont Dosyası Seç (PDF, PNG, JPG)
+                        </>
+                      )}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : (
+            <section>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-fbiad-dark-blue flex items-center gap-2">
                 <span className="bg-fbiad-yellow text-white w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span> 
@@ -511,6 +632,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               </div>
             </div>
           </section>
+          )}
 
           <section className="space-y-6 pt-4">
             <div className="flex items-start gap-3">
