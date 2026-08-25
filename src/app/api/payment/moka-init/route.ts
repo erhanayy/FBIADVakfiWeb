@@ -5,7 +5,7 @@ export async function POST(req: Request) {
     try {
         const body = await req.json();
         console.log("Incoming Moka payload:", JSON.stringify(body));
-        const { cardInfo, payload, installmentCount } = body;
+        const { cardInfo, payload, installmentCount, paymentMethod } = body;
 
         // Default to calculated count if not provided
         const finalInstallmentCount = installmentCount || ((payload.taksitMi && payload.plan && payload.plan.length > 1) ? payload.plan.length : 1);
@@ -68,7 +68,7 @@ export async function POST(req: Request) {
                 OtherTrxCode: trxCode,
                 IsPoolPayment: 0,
                 IsPreAuth: 0,
-                IsTokenized: 0,
+                IsTokenized: paymentMethod === 'subscription' ? 1 : 0,
                 ReturnHash: 1,
                 // We pass the ultra-compact base64 encoded payload in RedirectUrl. Since it no longer contains UUIDs for installments, it easily fits the 255 char limit!
                 RedirectUrl: `${callbackUrl}?payload=${encodeURIComponent(payloadBase64)}`,

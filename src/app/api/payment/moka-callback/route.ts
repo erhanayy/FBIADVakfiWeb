@@ -110,6 +110,7 @@ export async function POST(req: Request) {
                             userId: payload.userId,
                             count: payload.count,
                             transactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
+                            tokenCode: entries.TokenCode || entries.tokenCode || "",
                             paymentIds: [] // Backwards compatibility if needed, but not used anymore
                         })
                     });
