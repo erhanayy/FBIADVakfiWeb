@@ -327,8 +327,8 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
-                <div className="text-sm font-semibold text-blue-800 mb-1">Aylık/Tekil Tutar</div>
-                <div className="text-3xl font-bold text-blue-900">{payload.tekilTutar.toLocaleString('tr-TR')} ₺</div>
+                <div className="text-sm font-semibold text-blue-800 mb-1">{payload.taksitMi ? 'Aylık/Tekil Tutar' : 'Toplam Ödenecek Tutar'}</div>
+                <div className="text-3xl font-bold text-blue-900">{(payload.taksitMi ? payload.tekilTutar : payload.toplamTutar).toLocaleString('tr-TR')} ₺</div>
               </div>
               
               {paymentMethod === 'installment' && payload.taksitMi && payload.toplamTutar > payload.tekilTutar && (
