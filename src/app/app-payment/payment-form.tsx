@@ -503,10 +503,10 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               <div className="bg-blue-50 p-6 rounded-2xl border border-blue-200 space-y-6">
                 <div className="text-blue-900 bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
                   <p className="text-sm font-semibold mb-1 text-gray-500">Alıcı Adı:</p>
-                  <p className="text-lg font-bold mb-4">FENERBAHÇELİ İŞ ADAMLARI VAKFI</p>
+                  <p className="text-lg font-bold mb-4">FBİAD FENERBAHÇELİ İŞ ADAMLARI VAKFI</p>
                   
                   <p className="text-sm font-semibold mb-1 text-gray-500">Banka & IBAN:</p>
-                  <p className="text-xl font-bold tracking-wider font-mono bg-blue-50 p-2 rounded-lg text-center">TR00 0000 0000 0000 0000 0000 00</p>
+                  <p className="text-xl font-bold tracking-wider font-mono bg-blue-50 p-2 rounded-lg text-center">TR09 0021 0000 0009 3752 2000 01</p>
                   <p className="text-xs text-gray-500 mt-2 text-center">Ödemenizi gönderdikten sonra lütfen işlem dekontunu aşağıdan yükleyiniz.</p>
                 </div>
 
