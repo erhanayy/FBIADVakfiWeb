@@ -206,7 +206,8 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
           body: JSON.stringify({
             fundId: payload.fundId,
             transactionId: bankResult.transactionId,
-            paymentIds: payload.plan.map(p => p.id)
+            paymentMethod: paymentMethod,
+            paymentIds: paymentMethod === 'subscription' ? (payload.plan.length > 0 ? [payload.plan[0].id] : []) : payload.plan.map(p => p.id)
           })
         });
 
@@ -340,7 +341,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
               )}
             </div>
 
-            {payload.taksitMi && payload.plan && payload.plan.length > 0 && (
+            {payload.plan && payload.plan.length > 0 && (
               <div className="mt-8">
                 <div className="flex items-center gap-2 mb-4">
                   <h3 className="text-md font-bold text-gray-800">Ödeme Şekli</h3>
@@ -671,7 +672,7 @@ export default function AppPaymentForm({ payload }: { payload: PaymentPayload })
             className={`w-full bg-fbiad-dark-blue hover:bg-fbiad-blue text-white font-bold text-xl py-5 rounded-xl transition-all shadow-lg flex items-center justify-center gap-3 ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
           >
             <Lock size={24} />
-            {isSubmitting ? 'İşleminiz Yapılıyor...' : `Ödemeyi Tamamla (${(paymentMethod === 'installment' && payload.taksitMi && payload.toplamTutar > payload.tekilTutar ? payload.toplamTutar : payload.tekilTutar).toLocaleString('tr-TR')} ₺)`}
+            {isSubmitting ? 'İşleminiz Yapılıyor...' : `Ödemeyi Tamamla (${(!payload.taksitMi || (paymentMethod === 'installment' && payload.taksitMi && payload.toplamTutar > payload.tekilTutar) ? payload.toplamTutar : payload.tekilTutar).toLocaleString('tr-TR')} ₺)`}
           </button>
 
         </form>

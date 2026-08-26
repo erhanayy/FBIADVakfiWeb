@@ -24,7 +24,7 @@ export async function POST(req: Request) {
             shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${payload.adSoyad || ''}|${payload.donorEmail || ''}|${payload.donorTc || ''}|${payload.donorPhone || ''}|${payload.isAnonymous ? 1 : 0}|${payload.agreementsAccepted === 1 ? 1 : 0}`;
         } else {
             // For Burs payments, fundId and userId are UUIDs. We OMIT donor info to ensure Base64 string + RedirectUrl is < 255 chars!
-            shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}`;
+            shortStr = `${payload.fundId || ''}|${payload.userId || ''}|${planCount}|${payload.tekilTutar || payload.amount || 0}|${paymentMethod || ''}`;
         }
         
         // Use base64url to avoid special URL characters (+, /, =) which might crash Moka's ASP.NET backend
@@ -61,7 +61,7 @@ export async function POST(req: Request) {
                 ExpMonth: cardInfo.expMonth,
                 ExpYear: expYearStr,
                 CvcNumber: cardInfo.cvc,
-                Amount: Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
+                Amount: paymentMethod === 'subscription' ? Number(payload.tekilTutar || payload.amount || 0) : Number(payload.toplamTutar || payload.tekilTutar || payload.amount || 0),
                 Currency: "TL",
                 InstallmentNumber: finalInstallmentCount,
                 ClientIP: req.headers.get("x-forwarded-for") || "127.0.0.1",
@@ -74,6 +74,20 @@ export async function POST(req: Request) {
                 RedirectUrl: `${callbackUrl}?payload=${encodeURIComponent(payloadBase64)}`,
                 RedirectType: 0,
                 Description: `${payload.adSoyad} - Burs Bagisi`,
+                ...(paymentMethod === 'subscription' ? {
+                    CustomerInformation: {
+                        DealerCustomerId: "",
+                        CustomerCode: payload.userId || `USER-${Date.now()}`,
+                        FirstName: cardInfo.cardHolderName.split(' ')[0] || "Bursiyer",
+                        LastName: cardInfo.cardHolderName.split(' ').slice(1).join(' ') || "Destekcisi",
+                        Gender: "1",
+                        BirthDate: "",
+                        GsmNumber: payload.donorPhone || "",
+                        Email: payload.donorEmail || "",
+                        Address: "",
+                        CardName: "Aylık Burs Bağış Kartı"
+                    }
+                } : {})
             }
         };
 

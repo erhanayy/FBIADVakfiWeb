@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { fundId, transactionId, paymentIds, tokenCode, receiptUrl, paymentMethod } = await request.json();
+    const payload = await request.json();
+    console.log("EXECUTE ROUTE RECEIVED PAYLOAD:", JSON.stringify(payload));
+    const { fundId, transactionId, paymentIds, tokenCode, receiptUrl, paymentMethod } = payload;
 
     if (!fundId) {
       return NextResponse.json({ success: false, error: 'Missing fundId' }, { status: 400 });

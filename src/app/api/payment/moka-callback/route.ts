@@ -62,7 +62,8 @@ export async function POST(req: Request) {
                      userId: parts[1] || "",
                      count: Number(parts[2]) || 0,
                      tekilTutar: Number(parts[3]) || 0,
-                     adSoyad: parts[4] || "",
+                     paymentMethod: parts[4] || "",
+                     adSoyad: parts[5] || "",
                      donorEmail: parts[5] || "",
                      donorTc: parts[6] || "",
                      donorPhone: parts[7] || "",
@@ -111,6 +112,7 @@ export async function POST(req: Request) {
                             count: payload.count,
                             transactionId: entries.TrxCode || entries.trxCode || "MOKA-" + Date.now(),
                             tokenCode: entries.TokenCode || entries.tokenCode || "",
+                            paymentMethod: payload.paymentMethod,
                             paymentIds: [] // Backwards compatibility if needed, but not used anymore
                         })
                     });
