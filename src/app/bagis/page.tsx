@@ -117,7 +117,7 @@ export default function BagisPage() {
     }
   };
 
-  const predefinedAmounts = [2500, 5000, 10000, 20000];
+  const predefinedAmounts = [5000, 10000, 20000];
 
   const handleAmountClick = (val: number) => {
     setAmount(val);
@@ -305,6 +305,18 @@ export default function BagisPage() {
                       {val.toLocaleString('tr-TR')} ₺
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => handleAmountClick(50000)}
+                    className={`py-4 rounded-xl border-2 font-bold text-sm transition-all flex flex-col items-center justify-center gap-1 ${
+                        amount === 50000 
+                          ? "border-fbiad-blue bg-fbiad-blue text-white" 
+                          : "border-gray-200 text-gray-600 hover:border-fbiad-yellow hover:text-fbiad-dark-blue"
+                    }`}
+                  >
+                    <span className="text-lg">50.000 ₺</span>
+                    <span className="text-[10px] font-normal leading-tight px-1">(2026-2027 1 Öğrenci Burs Bedeli)</span>
+                  </button>
                 </div>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">₺</span>
