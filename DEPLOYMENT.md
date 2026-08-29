@@ -3,7 +3,7 @@
 Bu proje Google Cloud Run üzerinde **Source** (Kaynak Kod) tabanlı olarak derlenip yayınlanmaktadır. 
 
 ## Proje Bilgileri
-- **Google Cloud Projesi:** `dernekte-bugun`
+- **Google Cloud Projesi:** `dernektebugun-492221`
 - **Cloud Run Service Adı:** `fbiad-web`
 - **Bölge (Region):** `europe-west1`
 - **Erişim:** Public (Unauthenticated)
@@ -13,7 +13,7 @@ Bu proje Google Cloud Run üzerinde **Source** (Kaynak Kod) tabanlı olarak derl
 Projede yaptığınız değişiklikleri canlı ortama (internete) göndermek için terminalden proje kök dizininde aşağıdaki komutu çalıştırmanız yeterlidir:
 
 ```bash
-gcloud run deploy fbiad-web --source . --project dernekte-bugun --region europe-west1 --allow-unauthenticated
+gcloud run deploy fbiad-web --source . --project dernektebugun-492221 --region europe-west1 --allow-unauthenticated
 ```
 
 ### Arka Planda Ne Oluyor?

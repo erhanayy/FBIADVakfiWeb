@@ -105,10 +105,7 @@ export default function HavaleBagisPage() {
         setIsAnonymous(true);
         setIsFbiadMember(false);
         setWantsMembershipInfo(false);
-        setCardHolderName("ERHAN AYYILDIZ");
-        setCardNumber("5127 5411 2222 3332");
-        setExpDate("12/30");
-        setCvv("000");
+
         setKvkkAccepted(true);
         setAgreementAccepted(true);
         setIsNotRobot(true);
