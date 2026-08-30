@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const payload = await request.json();
     console.log("EXECUTE ROUTE RECEIVED PAYLOAD:", JSON.stringify(payload));
-    const { fundId, transactionId, paymentIds, tokenCode, receiptUrl, paymentMethod } = payload;
+    const { fundId, transactionId, paymentIds, tokenCode, receiptUrl, paymentMethod, count, userId } = payload;
 
     if (!fundId) {
       return NextResponse.json({ success: false, error: 'Missing fundId' }, { status: 400 });
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         // In a real app, send a shared secret to authenticate this webhook call
         'Authorization': `Bearer ${process.env.WEBHOOK_SECRET || 'fbiad-webhook-secret-key-123'}`,
       },
-      body: JSON.stringify({ fundId, transactionId, paymentIds, tokenCode, receiptUrl, paymentMethod })
+      body: JSON.stringify({ fundId, transactionId, paymentIds, tokenCode, receiptUrl, paymentMethod, count, userId })
     });
 
     if (!response.ok) {
