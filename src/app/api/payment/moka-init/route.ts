@@ -11,11 +11,11 @@ export async function POST(req: Request) {
         const finalInstallmentCount = installmentCount || ((payload.taksitMi && payload.plan && payload.plan.length > 1) ? payload.plan.length : 1);
 
         // Use environment variables for Moka API credentials
-        const dealerCode = process.env.MOKA_DEALER_CODE || "";
-        const username = process.env.MOKA_USERNAME || "";
-        const password = process.env.MOKA_PASSWORD || "";
         const isTestEnv = process.env.MOKA_IS_TEST === "true" || process.env.NODE_ENV !== "production";
         const apiUrl = isTestEnv ? "https://service.refmokaunited.com" : "https://service.mokaunited.com";
+        const dealerCode = isTestEnv ? (process.env.MOKA_TEST_DEALER_CODE || "Test") : (process.env.MOKA_DEALER_CODE || "");
+        const username = isTestEnv ? (process.env.MOKA_TEST_USERNAME || "Test") : (process.env.MOKA_USERNAME || "");
+        const password = isTestEnv ? (process.env.MOKA_TEST_PASSWORD || "Test") : (process.env.MOKA_PASSWORD || "");
         
         const planCount = payload.plan ? payload.plan.length : 0;
         
