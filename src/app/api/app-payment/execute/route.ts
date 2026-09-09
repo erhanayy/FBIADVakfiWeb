@@ -11,8 +11,19 @@ export async function POST(request: Request) {
     }
 
     // Call BurstaBugun webhook to mark specified fund payments as completed
-    const defaultUrl = process.env.NODE_ENV === 'production' ? 'https://burs.fbiadvakfi.org' : 'http://localhost:3004';
-    const burstaAppUrl = process.env.BURSTABUGUN_API_URL || defaultUrl;
+    // Robust environment-based URL resolution
+    let burstaAppUrl = process.env.BURSTABUGUN_API_URL;
+    
+    // If in production, strictly enforce the production URL unless a specific production override exists
+    if (process.env.NODE_ENV === 'production') {
+      // Allow override ONLY if it's explicitly an HTTPS production URL (prevents localhost leaks)
+      if (!burstaAppUrl || !burstaAppUrl.startsWith('https://')) {
+        burstaAppUrl = 'https://burs.fbiadvakfi.org';
+      }
+    } else {
+      burstaAppUrl = burstaAppUrl || 'http://localhost:3004';
+    }
+    
     const webhookUrl = `${burstaAppUrl}/api/webhooks/payment-complete`;
 
     const response = await fetch(webhookUrl, {

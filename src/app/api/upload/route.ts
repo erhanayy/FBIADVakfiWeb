@@ -9,8 +9,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    const defaultUrl = process.env.NODE_ENV === 'production' ? 'https://burs.fbiadvakfi.org' : 'http://localhost:3004';
-    const burstaAppUrl = process.env.BURSTABUGUN_API_URL || defaultUrl;
+    // Robust environment-based URL resolution
+    let burstaAppUrl = process.env.BURSTABUGUN_API_URL;
+    
+    if (process.env.NODE_ENV === 'production') {
+      if (!burstaAppUrl || !burstaAppUrl.startsWith('https://')) {
+        burstaAppUrl = 'https://burs.fbiadvakfi.org';
+      }
+    } else {
+      burstaAppUrl = burstaAppUrl || 'http://localhost:3004';
+    }
+    
     const uploadUrl = `${burstaAppUrl}/api/upload`;
 
     // Forward the file to BurstaBugun

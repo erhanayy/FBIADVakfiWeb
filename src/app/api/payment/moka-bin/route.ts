@@ -13,7 +13,7 @@ export async function POST(req: Request) {
         const dealerCode = process.env.MOKA_DEALER_CODE || "";
         const username = process.env.MOKA_USERNAME || "";
         const password = process.env.MOKA_PASSWORD || "";
-        const isTestEnv = process.env.MOKA_IS_TEST === "true"; 
+        const isTestEnv = process.env.MOKA_IS_TEST === "true" || process.env.NODE_ENV !== "production";
         const apiUrl = isTestEnv ? "https://service.refmokaunited.com" : "https://service.mokaunited.com";
 
         if (!dealerCode || !username || !password) {
