@@ -60,11 +60,11 @@ export default function BurslarimizPage() {
             <h3 className="text-xl font-medium text-gray-600">Şu anda yayınlanan aktif bir burs fonu bulunmamaktadır.</h3>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-6">
             {funds.map((fund) => (
-              <div key={fund.id} className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 flex flex-col h-full hover:shadow-2xl transition-shadow duration-300">
+              <div key={fund.id} className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 flex flex-col md:flex-row hover:shadow-xl transition-shadow duration-300">
                 {fund.photoUrl ? (
-                  <div className="relative h-64 w-full bg-gray-100">
+                  <div className="relative w-full md:w-1/3 lg:w-1/4 min-h-[250px] md:min-h-full bg-gray-100 flex-shrink-0">
                     <img 
                       src={fund.photoUrl} 
                       alt={fund.title}
@@ -72,56 +72,48 @@ export default function BurslarimizPage() {
                     />
                   </div>
                 ) : (
-                  <div className="relative h-64 w-full bg-gradient-to-r from-fbiad-dark-blue to-fbiad-blue flex items-center justify-center p-8">
+                  <div className="relative w-full md:w-1/3 lg:w-1/4 min-h-[250px] md:min-h-full bg-gradient-to-br from-fbiad-dark-blue to-fbiad-blue flex items-center justify-center p-8 flex-shrink-0">
                     <img 
                       src="/fbiad-logo-white.png" 
                       alt="FBİAD Logo" 
-                      className="h-32 object-contain opacity-30" 
+                      className="h-24 md:h-32 object-contain opacity-30" 
                       onError={(e) => {
-                          // Fallback to text if logo not found
                           e.currentTarget.style.display = 'none';
                       }}
                     />
                     <div className="absolute inset-0 flex items-center justify-center p-6 text-center">
-                        <span className="text-white/80 font-bold text-2xl drop-shadow-md">
+                        <span className="text-white/80 font-bold text-xl md:text-2xl drop-shadow-md line-clamp-3">
                             {fund.title}
                         </span>
                     </div>
                   </div>
                 )}
                 
-                <div className="p-6 md:p-8 flex-1 flex flex-col">
-                  <h3 className="text-2xl font-bold text-fbiad-dark-blue mb-3 line-clamp-2">
+                <div className="p-6 md:p-8 flex-1 flex flex-col justify-center">
+                  <h3 className="text-2xl font-bold text-fbiad-dark-blue mb-4">
                     {fund.title}
                   </h3>
                   
-                  <p className="text-gray-600 mb-6 flex-1 line-clamp-4">
+                  <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                     {fund.description}
                   </p>
                   
-                  <div className="mt-auto space-y-4 pt-6 border-t border-gray-100">
+                  <div className="mt-auto space-y-3 pt-6 border-t border-gray-100">
                     {fund.ownerName && (
-                      <div className="flex flex-col gap-1.5">
-                        <div className="flex items-center gap-2 text-fbiad-dark-blue font-medium">
-                          <User size={18} className="text-fbiad-yellow" />
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2 text-fbiad-dark-blue font-bold text-lg">
+                          <User size={20} className="text-fbiad-yellow" />
                           <span>Fon Sahibi: {fund.ownerName}</span>
                         </div>
                         
                         {fund.contributors && fund.contributors.length > 0 && (
-                          <div className="flex items-start gap-2 text-sm text-gray-500 pl-6">
-                            <Share2 size={16} className="mt-0.5 flex-shrink-0" />
-                            <span>Katkıda Bulunanlar: {fund.contributors.join(", ")}</span>
+                          <div className="flex items-start gap-2 text-base text-gray-500 pl-7">
+                            <Share2 size={18} className="mt-0.5 flex-shrink-0" />
+                            <span><strong className="font-semibold text-gray-600">Katkıda Bulunanlar:</strong> {fund.contributors.join(", ")}</span>
                           </div>
                         )}
                       </div>
                     )}
-                    
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="bg-fbiad-yellow/10 text-fbiad-dark-blue px-4 py-2 rounded-lg flex items-center gap-2 font-bold">
-                        <Users size={20} className="text-fbiad-yellow" />
-                        Desteklenen Öğrenci: {fund.studentCount} / {fund.targetStudentCount}
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
