@@ -97,6 +97,7 @@ export default function Navbar() {
                   >
                     <div className="py-2 flex flex-col">
                       <Link href="/burs#program" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors border-b border-gray-100">Burs Programı Tanıtımı</Link>
+                      <Link href="/burslarimiz" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors border-b border-gray-100">Burslarımız</Link>
                       <Link href="/burs#portal" className="px-4 py-2 hover:bg-gray-50 hover:text-fbiad-yellow transition-colors font-semibold">Burs Uygulaması</Link>
                     </div>
                   </motion.div>
@@ -168,6 +169,9 @@ export default function Navbar() {
               </Link>
               <Link href="/burs" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-fbiad-blue hover:text-fbiad-yellow" onClick={toggleMenu}>
                 Burs
+              </Link>
+              <Link href="/burslarimiz" className="block px-3 py-2 rounded-md text-base font-medium hover:bg-fbiad-blue hover:text-fbiad-yellow" onClick={toggleMenu}>
+                Burslarımız
               </Link>
               {/* Mobile Bagis Submenu */}
               <div className="bg-fbiad-yellow/10 rounded-md overflow-hidden">
